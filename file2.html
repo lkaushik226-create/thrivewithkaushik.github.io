@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Thrive with Kaushik - Global Transformational Coaching</title>
+  <meta name="description" content="World-class motivational speaker, leadership coach, and expert in stress and pressure management. Attracting clients worldwide: USA, UK, Europe, and beyond." />
+  <meta name="keywords" content="motivational speaker, leadership coach, stress management, pressure management, global business, USA, UK, Europe, wellness, transformation, Lalit Kaushik" />
+  <meta property="og:title" content="Thrive with Kaushik - Transform Your Life" />
+  <meta property="og:description" content="Holistic coaching for business professionals worldwide. Book a free consultation and start your transformation." />
+  <meta property="og:image" content="https://yourdomain.com/og-image.jpg" />
+  <meta property="og:url" content="https://yourdomain.com" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/ns.html?id=GTM-NMCNQ3XM"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag("js", new Date());
+    gtag("config", "GTM-NMCNQ3XM");
+  </script>
+
+  <!-- LinkedIn Insight Tag -->
+  <script type="text/javascript">
+    _linkedin_partner_id = "XXXXXXX";
+    window._linkedin_data_partner_ids = window._linkedin_data_partner_ids || [];
+    window._linkedin_data_partner_ids.push(_linkedin_partner_id);
+  </script>
+  <script type="text/javascript">
+    (function(){
+      var s = document.getElementsByTagName("script")[0];
+      var b = document.createElement("script");
+      b.type = "text/javascript"; b.async = true;
+      b.src = "https://snap.licdn.com/li.lms-analytics/insight.min.js";
+      s.parentNode.insertBefore(b, s);
+    })();
+  </script>
+
+  <style>
+    /* Collapse vertical gaps between sections */
+    section {
+      margin-top: 0;
+      margin-bottom: 0;
+      padding-top: 24px;  /* minimal vertical spacing inside sections */
+      padding-bottom: 24px;
+    }
+
+    /* Larger gallery with proper ratio and spacing */
+    #gallery {
+      padding-top: 48px;
+      padding-bottom: 48px;
+    }
+    #carousel-wrapper {
+      position: relative;
+      width: 630px; /* increased for larger images */
+      height: 400px;
+      overflow: visible;
+      margin: 0 auto 2rem;
+    }
+    .carousel-img {
+      position: absolute;
+      top: 40px;
+      left: 160px;
+      width: 370px;
+      height: 320px;
+      object-fit: cover;
+      border-radius: 16px;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
+      opacity: 0;
+      pointer-events: none;
+      cursor: pointer;
+      transition: left 0.6s ease, opacity 0.4s ease, transform 0.4s ease;
+      z-index: 1;
+      transform: scale(0.9);
+    }
+    .carousel-img.show-center {
+      opacity: 1;
+      left: 160px;
+      z-index: 3;
+      pointer-events: auto;
+      outline: 4px solid #fbbf24;
+      box-shadow: 0 4px 16px #fbbf24;
+      transform: scale(1.08);
+    }
+    .carousel-img.show-left {
+      opacity: 0.7;
+      left: 60px;
+      z-index: 2;
+      pointer-events: auto;
+      transform: scale(0.94);
+    }
+    .carousel-img.show-right {
+      opacity: 0.7;
+      left: 310px;
+      z-index: 2;
+      pointer-events: auto;
+      transform: scale(0.94);
+    }
+    #lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      justify-content: center;
+      align-items: center;
+      z-index: 50;
+      cursor: pointer;
+    }
+    #lightbox.show {
+      display: flex;
+    }
+    #lightbox-img {
+      max-height: 80vh;
+      max-width: 90vw;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(251, 191, 36, 0.8);
+    }
+    @media (max-width: 700px) {
+      #carousel-wrapper {
+        width: 98vw;
+        height: 260px;
+      }
+      .carousel-img, .carousel-img.show-center {
+        width: 250px;
+        height: 210px;
+      }
+      .carousel-img.show-center {
+        left: 35vw;
+      }
+      .carousel-img.show-left {
+        left: 7vw;
+      }
+      .carousel-img.show-right {
+        left: 60vw;
+      }
+    }
+  </style>
+</head>
+<body class="font-sans antialiased text-gray-800 bg-white">
+<!-- Hero -->
+<section class="bg-gradient-to-r from-blue-600 via-yellow-400 to-blue-600 text-white py-20">
+  <div class="container mx-auto text-center px-6">
+    <img src="logo.png" alt="Thrive with Kaushik Logo" class="mb-6 w-32 h-auto" />
+    <h1 class="text-5xl md:text-7xl font-bold mb-6 drop-shadow-lg">Thrive with Kaushik</h1>
+    <p class="text-lg md:text-2xl mb-8 font-semibold">Global Transformational Coaching for Leaders & Teams</p>
+    <a href="#contact" class="bg-white text-blue-700 hover:bg-yellow-400 hover:text-white px-6 py-3 rounded-2xl font-semibold shadow transition-colors duration-300"
+       aria-label="Start Your Journey With Thrive">Start Your Journey</a>
+  </div>
+</section>
+<!-- Services -->
+<section id="services" class="py-16 bg-white">
+  <div class="container mx-auto px-6 text-center">
+    <h2 class="text-3xl font-bold mb-10 text-blue-600">Our Expertise</h2>
+    <div class="grid md:grid-cols-4 gap-8">
+      <div class="p-6 bg-yellow-400 rounded-2xl shadow text-blue-900">
+        <h3 class="font-bold text-xl mb-4">Motivational Speaking</h3>
+        <p>Inspire and energize your teams globally with proven motivational strategies.</p>
+      </div>
+      <div class="p-6 bg-blue-600 rounded-2xl shadow text-white">
+        <h3 class="font-bold text-xl mb-4">Leadership Coaching</h3>
+        <p>Develop world-class leadership skills to excel in a competitive environment.</p>
+      </div>
+      <div class="p-6 bg-white border-2 border-blue-600 rounded-2xl shadow text-blue-700">
+        <h3 class="font-bold text-xl mb-4">Stress & Pressure Management</h3>
+        <p>Learn powerful techniques to overcome stress and thrive under pressure.</p>
+      </div>
+      <div class="p-6 bg-yellow-400 rounded-2xl shadow text-blue-900">
+        <h3 class="font-bold text-xl mb-4">Business Development</h3>
+        <p>Unlock your business potential with growth-focused, strategic coaching.</p>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- About -->
+<section id="about" class="py-16 bg-blue-600 text-white">
+  <div class="container mx-auto px-6 text-center">
+    <h2 class="text-3xl font-bold mb-10">Meet Lalit Kaushik</h2>
+    <p class="max-w-2xl mx-auto text-lg">A passionate motivator and coach with years of experience helping professionals worldwide—business leaders, engineers, architects, lawyers, and more—transform their lives holistically from health to wealth.</p>
+  </div>
+</section>
+<!-- Gallery Carousel -->
+<section id="gallery" aria-labelledby="gallery-title">
+  <h2 id="gallery-title" class="text-3xl font-bold text-center mb-10">Gallery</h2>
+  <div id="carousel-wrapper">
+    <div id="carousel">
+      <img src="pic1.png" alt="Motivational event picture 1" class="carousel-img" />
+      <img src="pic2.png" alt="Motivational event picture 2" class="carousel-img" />
+      <img src="pic3.png" alt="Motivational event picture 3" class="carousel-img" />
+      <img src="pic4.png" alt="Motivational event picture 4" class="carousel-img" />
+    </div>
+  </div>
+  <div id="lightbox">
+    <img id="lightbox-img" src="" alt="Full View" />
+  </div>
+</section>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const imgs = Array.from(document.querySelectorAll('.carousel-img'));
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightbox-img');
+    let current = 0;
+    function updateGallery() {
+      imgs.forEach((img, idx) => {
+        img.classList.remove('show-center', 'show-left', 'show-right');
+        img.style.opacity = 0;
+        img.style.pointerEvents = 'none';
+        img.style.transform = 'scale(0.9)';
+        if (idx === current) {
+          img.classList.add('show-center');
+          img.style.opacity = 1;
+          img.style.pointerEvents = 'auto';
+        } else if (idx === (current - 1 + imgs.length) % imgs.length) {
+          img.classList.add('show-left');
+          img.style.opacity = 0.7;
+          img.style.pointerEvents = 'auto';
+        } else if (idx === (current + 1) % imgs.length) {
+          img.classList.add('show-right');
+          img.style.opacity = 0.7;
+          img.style.pointerEvents = 'auto';
+        }
+      });
+    }
+    updateGallery();
+    setInterval(() => {
+      current = (current + 1) % imgs.length;
+      updateGallery();
+    }, 2600);
+    imgs.forEach(img => {
+      img.addEventListener('click', () => {
+        lightboxImg.src = img.src;
+        lightbox.classList.add('show');
+      });
+    });
+    lightbox.addEventListener('click', () => {
+      lightbox.classList.remove('show');
+      lightboxImg.src = '';
+    });
+  });
+</script>
+<!-- Testimonials -->
+<section class="testimonials bg-white py-16">
+  <div class="container mx-auto px-6">
+    <h2 class="text-3xl font-bold text-center mb-10 text-blue-600">What Our Clients Say</h2>
+    <div class="grid md:grid-cols-3 gap-8 mb-12">
+      <div class="p-6 bg-yellow-400 rounded-2xl shadow text-blue-900">
+        <p class="mb-4 italic">"Lalit’s coaching transformed my leadership approach. I feel more balanced and productive."</p>
+        <h4 class="font-bold">— Amit Sharma, Business Owner (USA)</h4>
+      </div>
+      <div class="p-6 bg-blue-600 rounded-2xl shadow text-white">
+        <p class="mb-4 italic">"The stress management program was a life-saver. Highly recommended!"</p>
+        <h4 class="font-bold">— Priya Mehra, Architect (UK)</h4>
+      </div>
+      <div class="p-6 bg-white border-2 border-blue-600 rounded-2xl shadow text-blue-700">
+        <p class="mb-4 italic">"A complete transformation in my professional and personal life."</p>
+        <h4 class="font-bold">— Rajeev Kumar, Lawyer (Europe)</h4>
+      </div>
+    </div>
+    <h3 class="text-2xl font-semibold text-center mb-6 text-blue-700">Watch Our Client Stories</h3>
+    <div class="grid md:grid-cols-3 gap-6">
+      <div class="w-full aspect-w-16 aspect-h-9">
+        <iframe class="w-full h-64 rounded-2xl shadow" src="https://www.youtube.com/embed/VIDEO_ID1" frameborder="0" aria-label="Video testimonial from Amit Sharma" allowfullscreen></iframe>
+      </div>
+      <div class="w-full aspect-w-16 aspect-h-9">
+        <iframe class="w-full h-64 rounded-2xl shadow" src="https://www.youtube.com/embed/VIDEO_ID2" frameborder="0" aria-label="Video testimonial from Priya Mehra" allowfullscreen></iframe>
+      </div>
+      <div class="w-full aspect-w-16 aspect-h-9">
+        <iframe class="w-full h-64 rounded-2xl shadow" src="https://www.youtube.com/embed/VIDEO_ID3" frameborder="0" aria-label="Video testimonial from Rajeev Kumar" allowfullscreen></iframe>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- Free Consultation -->
+<section class="bg-yellow-400 text-blue-900 py-16">
+  <div class="container mx-auto px-6 text-center">
+    <h2 class="text-3xl font-bold mb-6">Get a Free Consultation</h2>
+    <p class="mb-6">Take the first step towards a better you. Book your consultation today.</p>
+    <form action="https://formspree.io/f/mrblvnrn" method="POST" class="max-w-md mx-auto bg-white p-6 rounded-2xl shadow space-y-4" aria-label="Free Consultation Booking Form">
+      <input type="text" name="name" placeholder="Your Name" required aria-label="Your Name" class="w-full px-4 py-2 rounded-lg border" />
+      <input type="email" name="email" placeholder="Your Email" required aria-label="Your Email" class="w-full px-4 py-2 rounded-lg border" />
+      <button type="submit" class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-yellow-400 hover:text-blue-900 transition-colors duration-300" aria-label="Get Free Consultation">Book Consultation</button>
+      <p class="text-green-600 mt-2 hidden" id="form-success">Thank you! Your consultation is booked.</p>
+    </form>
+    <p class="text-sm mt-4">By booking, you agree to our <a href="/privacy-policy" class="underline">Privacy Policy</a>.</p>
+  </div>
+</section>
+<!-- Products -->
+<section id="products" aria-labelledby="products-title">
+  <h2 id="products-title" class="text-3xl font-bold text-center mb-10 text-blue-600">Books & Products Available</h2>
+  <div class="products" aria-label="Books and products for purchase">
+    <div class="product">
+      <a href="https://www.amazon.com/dp/B09KN2Q4JJ" target="_blank" rel="noopener noreferrer" aria-label="Buy Book 1 on Amazon">
+        <img src="Book1Fun with Math.png" alt="Fun with Math book cover" />
+        <span>Book 1</span>
+      </a>
+    </div>
+    <div class="product">
+      <a href="https://www.amazon.com/dp/B09L4SSZN3" target="_blank" rel="noopener noreferrer" aria-label="Buy Book 2 on Amazon">
+        <img src="Book2 Prosperity Through Spritualism.png" alt="Prosperity Through Spiritualism book cover" />
+        <span>Book 2</span>
+      </a>
+    </div>
+    <div class="product">
+      <a href="https://www.amazon.com/dp/B09C5WT4MC" target="_blank" rel="noopener noreferrer" aria-label="Buy Book 3 on Amazon">
+        <img src="Book 3Adhyatmic sastikaran.png" alt="Adhyatmic Sastikaran book cover" />
+        <span>Book 3</span>
+      </a>
+    </div>
+    <div class="product">
+      <a href="https://www.amazon.com/dp/B0DFWNFB15" target="_blank" rel="noopener noreferrer" aria-label="Buy Book 4 on Amazon">
+        <img src="Book 4 junior mba seeding.png" alt="Junior MBA Seeding book cover" />
+        <span>Book 4</span>
+      </a>
+    </div>
+  </div>
+</section>
+<style>
+  .products {
+    display: flex;
+    flex-direction: row;
+    gap: 32px;
+    justify-content: center;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .product {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 150px;
+    max-width: 180px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0px 2px 8px rgba(37, 99, 235, 0.12);
+    padding: 16px;
+    margin-bottom: 18px;
+    transition: box-shadow 0.2s;
+  }
+  .product:hover {
+    box-shadow: 0px 4px 16px #fbbf24;
+  }
+  .product img {
+    width: 100%;
+    max-width: 150px;
+    height: auto;
+    margin-bottom: 8px;
+    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.12);
+    border-radius: 8px;
+  }
+  .product span {
+    display: block;
+    font-weight: 500;
+    margin-top: 4px;
+    color: #2563eb;
+  }
+  @media (max-width: 600px) {
+    .products {
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+    }
+    .product {
+      max-width: 100%;
+    }
+    .product img {
+      max-width: 80vw;
+    }
+  }
+</style>
+<!-- Bulk Buying Special Discount -->
+<section id="bulk-buying" class="py-16 bg-yellow-400 text-blue-900">
+  <div class="container mx-auto px-6 text-center">
+    <h2 class="text-3xl font-bold mb-6">Bulk Buying & Gifting</h2>
+    <p class="mb-6 text-lg">Order books and products in bulk for your team, corporate gifting, or educational use and unlock <span class="font-bold text-blue-600">special discounts</span>!</p>
+    <a href="mailto:thrivewithkaushik@gmail.com?subject=Bulk%20Order%20Enquiry&body=Hello%20Kaushik%20Team,%0A%0AI%20am%20interested%20in%20bulk%20purchase.%20Please%20share%20pricing%20and%20next%20steps."
+      class="inline-block bg-blue-600 text-white px-8 py-4 rounded-2xl font-semibold shadow mt-4 hover:bg-blue-700 transition-colors duration-300"
+      aria-label="Email now for bulk buying special discount">
+      Email Now for Special Bulk Discount
+    </a>
+    <p class="mt-4 text-md">Or email us directly:
+      <a href="mailto:thrivewithkaushik@gmail.com" class="underline font-semibold">thrivewithkaushik@gmail.com</a>
+    </p>
+  </div>
+</section>
+<!-- Contact -->
+<section id="contact" class="py-16 bg-blue-600 text-white">
+  <div class="container mx-auto px-6 text-center">
+    <h2 class="text-3xl font-bold mb-6">Book a Session</h2>
+    <p class="mb-6">Choose your preferred booking option:</p>
+    <div class="flex flex-col md:flex-row justify-center gap-6">
+      <a href="https://wa.me/919953715382?text=I%20want%20to%20book%20a%20session" target="_blank" class="bg-yellow-400 text-blue-900 px-6 py-3 rounded-2xl font-semibold shadow hover:bg-white hover:text-blue-700 transition-colors duration-300" aria-label="Book via WhatsApp">Book via WhatsApp</a>
+      <a href="https://calendly.com/thrivewithkaushik/30min" target="_blank" class="bg-white text-blue-700 px-6 py-3 rounded-2xl font-semibold shadow hover:bg-yellow-400 hover:text-blue-900 transition-colors duration-300" aria-label="Book via Calendly">Book via Calendly</a>
+    </div>
+  </div>
+</section>
+<!-- Footer -->
+<footer class="bg-blue-600 text-white text-center py-6">
+  <p>
+    &copy; 2025 Thrive with Kaushik. All rights reserved.
+    <a href="/privacy-policy" class="underline text-yellow-400 ml-2">Privacy Policy</a>
+  </p>
+</footer>
+<!-- Tidio Chatbot -->
+<script src="//code.tidio.co/your-tidio-key.js" async></script>
+
+</body>
+</html>
