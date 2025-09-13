@@ -1,0 +1,8 @@
+# robots.txt for https://www.thrivewithkaushik.com
+
+User-agent: *
+Disallow:
+
+# Allow all search engines to crawl everything
+
+Sitemap: https://www.thrivewithkaushik.com/sitemap.xml
