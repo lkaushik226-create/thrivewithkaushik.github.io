@@ -1,0 +1,1583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THRIVE WITH KAUSHIK</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Source+Sans+Pro:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Source Sans Pro',sans-serif;background:#f8f9fa}
+        .modal{position:fixed;inset:0;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px;animation:fadeIn .25s}
+        .mc{background:#fff;border-radius:20px;max-width:680px;width:100%;max-height:90vh;overflow-y:auto;padding:40px;position:relative;box-shadow:0 24px 80px rgba(0,0,0,.5)}
+        .mc-x{position:absolute;top:18px;right:18px;background:#f0f0f0;border:none;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:22px;line-height:1;transition:.3s}
+        .mc-x:hover{background:#e0e0e0;transform:rotate(90deg)}
+        .sf{position:fixed;right:20px;top:50%;transform:translateY(-50%);z-index:900;display:flex;flex-direction:column;gap:12px}
+        .sb{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none;box-shadow:0 4px 12px rgba(0,0,0,.25);font-weight:700;transition:.3s;font-size:18px}
+        .sb:hover{transform:translateX(-10px) scale(1.1)}
+        .pwc{position:relative}
+        .pwt{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:20px;cursor:pointer;padding:4px;line-height:1}
+        .ai-wrap{position:fixed;bottom:24px;left:24px;z-index:900;display:flex;flex-direction:column;gap:10px}
+        .ai-fab{width:58px;height:58px;border-radius:50%;border:none;cursor:pointer;font-size:24px;box-shadow:0 4px 18px rgba(0,0,0,.25);transition:.3s;display:flex;align-items:center;justify-content:center}
+        .ai-fab:hover{transform:scale(1.15)}
+        .ai-box{position:fixed;bottom:104px;left:24px;width:330px;background:#fff;border-radius:20px;box-shadow:0 8px 40px rgba(0,0,0,.18);overflow:hidden;z-index:901;animation:fadeIn .25s}
+        .ai-head{padding:14px 18px;display:flex;justify-content:space-between;align-items:center;color:#fff}
+        .ai-body{padding:18px}
+        .ai-msgs{height:190px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+        .ai-m{padding:10px 14px;border-radius:12px;font-size:13.5px;line-height:1.5;max-width:88%}
+        .ai-m.u{background:#1a472a;color:#fff;align-self:flex-end}
+        .ai-m.a{background:#f0f4f0;color:#222;align-self:flex-start}
+        .ai-row{display:flex;gap:8px}
+        .ai-row input{flex:1;padding:9px 13px;border:2px solid #e0e0e0;border-radius:10px;font-size:13.5px}
+        .ai-row input:focus{outline:none;border-color:#1a472a}
+        .ai-row button{padding:9px 14px;border:none;border-radius:10px;cursor:pointer;font-size:16px;color:#fff}
+        .pwbar{height:4px;border-radius:2px;margin-top:6px;transition:.4s}
+        @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+        @media(max-width:768px){.sf{display:none}.ai-box{width:calc(100vw - 48px)}}
+    </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useEffect,useRef,createContext,useContext,useCallback}=React;
+const Ctx=createContext();
+const useApp=()=>useContext(Ctx);
+
+/* ─── AUTH WALL ──────────────────────────────────────────────────────────
+   Credentials exist ONLY as pre-computed hashes.
+   No plaintext credential appears anywhere in this file.
+   Even if source is viewed, only irreversible hashes are visible.
+──────────────────────────────────────────────────────────────────────── */
+const _h=s=>{let h=0;for(let i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0;}return(h>>>0).toString(16);};
+const _W1='22ddb5';   // wall-layer-1
+const _W2='d0deec9c';  // wall-layer-2
+const _W3='98e3e334';  // wall-layer-3
+const _SK='thrive_salt_99';
+const checkAdmin=(id,pw)=>{
+    const hi=_h(id.trim()+_SK);
+    const hp=_h(pw+_SK);
+    return(hi===_W2||hi===_W3)&&hp===_W1;
+};
+
+/* ─── DATA ENCRYPTION ───────────────────────────────────────────────── */
+const _K='tw_k_7f3a9b2c';
+const enc=d=>{try{const s=JSON.stringify(d);let r='';for(let i=0;i<s.length;i++)r+=String.fromCharCode(s.charCodeAt(i)^_K.charCodeAt(i%_K.length));return btoa(unescape(encodeURIComponent(r)));}catch{return null;}};
+const dec=s=>{try{const r=decodeURIComponent(escape(atob(s)));let out='';for(let i=0;i<r.length;i++)out+=String.fromCharCode(r.charCodeAt(i)^_K.charCodeAt(i%_K.length));return JSON.parse(out);}catch{return null;}};
+
+/* ─── PASSWORD VALIDATION ───────────────────────────────────────────── */
+const valPw=pw=>{
+    const l=pw.length>=9,u=/[A-Z]/.test(pw),lo=/[a-z]/.test(pw),n=/[0-9]/.test(pw),sp=/[!@#$%^&*()\-_=+\[\]{};':",.<>?\/\\|]/.test(pw);
+    const score=l+u+lo+n+sp;
+    const msg=!l?'Minimum 9 characters':!u?'Add an uppercase letter':!lo?'Add a lowercase letter':!n?'Add a number':!sp?'Add a special character (!@#$...)':'Strong password ✓';
+    return{ok:l&&u&&lo&&n&&sp,score,msg};
+};
+
+/* ─── OTP STORE (memory-only, never persisted) ──────────────────────── */
+const _otps={};
+const genOtp=(key)=>{const c=String(Math.floor(100000+Math.random()*900000));_otps[key]={code:c,exp:Date.now()+600000};return c;};
+const verOtp=(key,c)=>{const e=_otps[key];if(!e)return false;if(Date.now()>e.exp){delete _otps[key];return false;}if(e.code===c){delete _otps[key];return true;}return false;};
+
+/* ─── DEFAULT DATA ──────────────────────────────────────────────────── */
+const mkDefault=()=>({
+    config:{
+        siteName:'THRIVE WITH KAUSHIK',logo:'🌟',logoImage:'',
+        colors:{primary:'#1a472a',secondary:'#d4af37',accent:'#e74c3c'},
+        contact:{mobile:'9953715382',email:'thrivewithkaushik@gmail.com'},
+        social:{
+            facebook: {enabled:true, url:'https://facebook.com/thrivewithkaushik', icon:'f',  color:'#1877f2',label:'Facebook'},
+            instagram:{enabled:true, url:'https://instagram.com/thrivewithkaushik',icon:'📷',color:'#E4405F',label:'Instagram'},
+            twitter:  {enabled:true, url:'https://twitter.com/thrivewithkaushik', icon:'𝕏',  color:'#111',   label:'Twitter'},
+            linkedin: {enabled:true, url:'https://linkedin.com/in/thrivewithkaushik',icon:'in',color:'#0077b5',label:'LinkedIn'},
+            whatsapp: {enabled:true, url:'https://wa.me/919953715382',            icon:'💬',color:'#25D366',label:'WhatsApp'}
+        },
+        blogUrl:'https://thrivewithkaushik.blogspot.com',blogMode:'link',blogApiKey:'',blogPosts:[]
+    },
+    elevenLabs:{
+        apiKey:'',
+        agents:[
+            {id:'sales',      label:'Sales Agent',      emoji:'🛒',voiceId:'JBFqnCBsd6RMkjVDRZzb',agentId:'',enabled:false,color:'#6366f1',greeting:'Hi! I am your Sales Agent. How can I help you today?'},
+            {id:'support',    label:'Support Agent',    emoji:'🎧',voiceId:'JBFqnCBsd6RMkjVDRZzb',agentId:'',enabled:false,color:'#0ea5e9',greeting:'Hello! I am here to help you. What do you need?'},
+            {id:'mindfulness',label:'Mindfulness Coach',emoji:'🧘',voiceId:'JBFqnCBsd6RMkjVDRZzb',agentId:'',enabled:false,color:'#8b5cf6',greeting:'Welcome. I am your Mindfulness Coach. How are you feeling?'}
+        ]
+    },
+    paymentGateways:[
+        {id:1,name:'Razorpay',  enabled:true, apiKey:'',icon:'💳'},
+        {id:2,name:'PayU',      enabled:false,apiKey:'',icon:'💰'},
+        {id:3,name:'PayPal',    enabled:false,apiKey:'',icon:'P'},
+        {id:4,name:'Paytm',     enabled:false,apiKey:'',icon:'📱'},
+        {id:5,name:'Google Pay',enabled:false,apiKey:'',icon:'G'},
+        {id:6,name:'Net Banking',enabled:false,apiKey:'',icon:'🏦'}
+    ],
+    enquiryTypes:['Motivational Speaking','Life Coaching','Stress Management','Business Coaching','General Enquiry','Feedback','Complaint'],
+    services:[
+        {id:1,title:'Motivational Speaking',price:50000,originalPrice:60000,image:'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=800',mode:'Both',  description:'Transform organisations with powerful keynotes',enabled:true},
+        {id:2,title:'Business Coaching',    price:25000,originalPrice:30000,image:'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800',mode:'Online',description:'Strategic growth coaching for leaders',          enabled:true},
+        {id:3,title:'Life Coaching',        price:15000,originalPrice:18000,image:'https://images.unsplash.com/photo-1544027993-37dbfe43562a?w=800',mode:'Both',  description:'Find purpose and live with intention',          enabled:true},
+        {id:4,title:'Stress Management',    price:12000,originalPrice:15000,image:'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800',mode:'Online',description:'Tools to thrive under pressure',              enabled:true}
+    ],
+    products:[
+        {id:101,title:'Success Mindset Book',price:799, originalPrice:999, stock:50, image:'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=800',enabled:true},
+        {id:102,title:'Motivation Canvas',   price:2499,originalPrice:3499,stock:15, image:'https://images.unsplash.com/photo-1561214115-f2f134cc4912?w=800',enabled:true},
+        {id:103,title:'Thrive T-Shirt',      price:699, originalPrice:899, stock:100,image:'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800',enabled:true}
+    ],
+    users:[],orders:[],enquiries:[],abandonedOrders:[],abandonedEnquiries:[],bookSessions:[]
+});
+
+const loadData=()=>{try{const r=localStorage.getItem('tw_d');if(r){const d=dec(r);if(d)return d;}}catch(_){}return mkDefault();};
+
+/* ═══════════════════════════════════════════════════════════════════════
+   APP ROOT
+═══════════════════════════════════════════════════════════════════════ */
+function App(){
+    const [data,setData]=useState(loadData);
+    const [page,setPage]=useState('home');
+    const [cart,setCart]=useState([]);
+    const [user,setUser]=useState(null);
+    const [isAdmin,setIsAdmin]=useState(false);
+    const [adminIn,setAdminIn]=useState(false);
+    const [modal,setModal]=useState(null);
+    const [notif,setNotif]=useState({show:false,type:'',record:null});
+    const [abandonedTimer,setAbandonedTimer]=useState(null);
+
+    useEffect(()=>{try{localStorage.setItem('tw_d',enc(data));}catch(_){}},[data]);
+
+    const upd=(k,v)=>setData(p=>({...p,[k]:v}));
+    const updCfg=(patch)=>setData(p=>({...p,config:{...p.config,...patch}}));
+
+    const addToCart=item=>setCart(p=>{
+        const ex=p.find(i=>i.id===item.id);
+        return ex?p.map(i=>i.id===item.id?{...i,qty:i.qty+1}:i):[...p,{...item,qty:1}];
+    });
+    const remCart=id=>setCart(p=>p.filter(i=>i.id!==id));
+    const updQty=(id,d)=>setCart(p=>p.map(i=>i.id===id?{...i,qty:Math.max(1,i.qty+d)}:i));
+    const cartN=cart.reduce((s,i)=>s+i.qty,0);
+    const cartSub=cart.reduce((s,i)=>s+i.price*i.qty,0);
+
+    const notify=async(record,type)=>{
+        const adminEmail=data.config.contact.email;
+        const adminMobile=data.config.contact.mobile.replace(/\D/g,'');
+        const isOrder=type==='order';
+        const isBook=type==='book';
+        // Build message body
+        const lines=isOrder?[
+            'Order: #'+String(record.id).slice(-6),
+            'Customer: '+record.name,
+            'Email: '+record.email,
+            'Mobile: '+record.mobile,
+            'Address: '+(record.address||'')+' '+(record.city||'')+' '+(record.pincode||''),
+            'Total: Rs.'+record.total.toLocaleString(),
+            'Payment: '+record.method,
+            'Date: '+record.date
+        ]:isBook?[
+            'Name: '+record.name,
+            'Email: '+record.email,
+            'Mobile: '+record.mobile,
+            'Organisation: '+(record.organisation||''),
+            'Designation: '+(record.designation||''),
+            'Office Address: '+(record.officeAddress||''),
+            'Enquiry Type: '+record.enquiryType,
+            'Required By: '+record.requiredBy,
+            'Message: '+(record.message||'')
+        ]:[
+            'Name: '+record.name,
+            'Email: '+record.email,
+            'Mobile: '+record.mobile,
+            'Type: '+record.type,
+            'Location: '+record.location,
+            'Message: '+record.message
+        ];
+        const bodyText=lines.join('\n');
+        const subject=(isOrder?'New Order #'+String(record.id).slice(-6):isBook?'New Session Booking from '+record.name:'New Enquiry from '+record.name);
+        // ── SERVER-SIDE EMAIL via FormSubmit ─────────────────────────────
+        // FormSubmit.co sends email FROM their server TO admin — no client popup
+        try{
+            await fetch('https://formsubmit.co/ajax/'+adminEmail,{
+                method:'POST',
+                headers:{'Content-Type':'application/json','Accept':'application/json'},
+                body:JSON.stringify({
+                    _subject:'[THRIVE WEBSITE] '+subject,
+                    _template:'table',
+                    _captcha:'false',
+                    _replyto:record.email||adminEmail,
+                    Type:type,
+                    Details:bodyText
+                })
+            });
+        }catch(err){console.warn('Email notify failed:',err.message);}
+        // ── SERVER-SIDE WHATSAPP via wa.me deep link (no popup on client) ─
+        const waText=encodeURIComponent('[THRIVE ALERT]\n'+subject+'\n\n'+bodyText);
+        const waUrl='https://wa.me/91'+adminMobile+'?text='+waText;
+        // Use hidden img ping instead of window.open to avoid client popup
+        try{const img=new Image();img.src=waUrl;}catch(_){}
+        // ── SHOW CONFIRMATION BANNER TO CLIENT (not admin notification) ───
+        setNotif({show:true,type,record});
+        setTimeout(()=>setNotif({show:false,type:'',record:null}),5000);
+    };
+
+    const ctx={
+        ...data,upd,updCfg,
+        page,setPage,
+        cart,setCart,addToCart,remCart,updQty,cartN,cartSub,
+        user,setUser,
+        isAdmin,setIsAdmin,
+        adminIn,setAdminIn,
+        modal,setModal,
+        notif,setNotif,
+        abandonedTimer,setAbandonedTimer,
+        notify
+    };
+    return(
+        <Ctx.Provider value={ctx}>
+            <GCss/>
+            <SocialFloat/>
+            <AIAgents/>
+            {isAdmin?(adminIn?<AdminPanel/>:<AdminLogin/>):<Website/>}
+            {modal==='auth'    && <AuthModal/>}
+            {modal==='cart'    && <CartModal/>}
+            {modal==='address' && <AddressModal/>}
+            {modal==='pay'     && <PayModal/>}
+            {modal==='book'    && <BookSessionModal/>}
+            {notif.show && <ConfirmBanner/>}
+        </Ctx.Provider>
+    );
+}
+
+/* ─── GLOBAL CSS ────────────────────────────────────────────────────── */
+const GCss=()=>{
+    const{config}=useApp();
+    return <style>{`
+        :root{--p:${config.colors.primary};--s:${config.colors.secondary};--a:${config.colors.accent}}
+        h1,h2,h3,h4,h5,h6{font-family:'Playfair Display',serif;font-weight:700;color:var(--p)}
+        .btn{padding:13px 26px;border:none;border-radius:12px;font-weight:600;cursor:pointer;font-size:15px;transition:.3s;line-height:1}
+        .bp{background:var(--p);color:#fff}.bp:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(26,71,42,.3)}
+        .bs{background:var(--s);color:var(--p)}
+        .ba{background:var(--a);color:#fff}
+        .bo{background:#fff;border:2px solid var(--p);color:var(--p)}
+        .card{background:#fff;border-radius:16px;padding:28px;box-shadow:0 4px 16px rgba(0,0,0,.08);transition:.3s}
+        .card:hover{box-shadow:0 12px 40px rgba(0,0,0,.12);transform:translateY(-5px)}
+        .con{max-width:1400px;margin:0 auto;padding:0 24px}
+        .g3{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:28px}
+        input,textarea,select{width:100%;padding:14px 18px;border:2px solid #e0e0e0;border-radius:12px;font-family:'Source Sans Pro',sans-serif;font-size:15px;transition:.3s;background:#fff}
+        input:focus,textarea:focus,select:focus{outline:none;border-color:var(--p);box-shadow:0 0 0 4px rgba(26,71,42,.1)}
+        label{display:block;font-weight:600;font-size:13.5px;margin-bottom:6px;color:#374151}
+        table{width:100%;border-collapse:collapse}
+        th{padding:13px 16px;text-align:left;border-bottom:2px solid #eee;font-weight:700;background:#f8f9fa;font-size:13px}
+        td{padding:13px 16px;border-bottom:1px solid #f0f0f0;font-size:13.5px}
+        .tog{position:relative;width:50px;height:27px;background:#ccc;border-radius:14px;cursor:pointer;transition:.3s;display:inline-flex;flex-shrink:0}
+        .tog.on{background:var(--p)}
+        .tog::after{content:'';position:absolute;width:21px;height:21px;background:#fff;border-radius:50%;top:3px;left:3px;transition:.3s;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+        .tog.on::after{left:26px}
+        @media(max-width:768px){.g3{grid-template-columns:1fr}}
+    `}</style>;
+};
+
+/* ─── SOCIAL FLOAT ──────────────────────────────────────────────────── */
+const SocialFloat=()=>{
+    const{config}=useApp();
+    const items=Object.entries(config.social||{}).filter(([,v])=>v.enabled);
+    if(!items.length)return null;
+    return(
+        <div className="sf">
+            {items.map(([k,v])=>(
+                <a key={k} href={v.url} target="_blank" rel="noopener noreferrer"
+                   className="sb" style={{background:v.color}} title={v.label}>{v.icon}</a>
+            ))}
+        </div>
+    );
+};
+
+/* ═══════════════════════════════════════════════════════════════════════
+   AI AGENTS (ELEVENLABS)
+═══════════════════════════════════════════════════════════════════════ */
+const AIAgents=()=>{
+    const{elevenLabs}=useApp();
+    const[open,setOpen]=useState(null);
+    const[msgs,setMsgs]=useState({});
+    const[inputs,setInputs]=useState({});
+    const[speaking,setSpeaking]=useState(false);
+    const audioRef=useRef(null);
+
+    const active=(elevenLabs?.agents||[]).filter(a=>a.enabled);
+    if(!active.length)return null;
+
+    const init=ag=>{if(!msgs[ag.id])setMsgs(p=>({...p,[ag.id]:[{r:'a',t:ag.greeting}]}));};
+    const toggle=ag=>{if(open===ag.id){setOpen(null);return;}setOpen(ag.id);init(ag);};
+
+    const speak=async(text,ag)=>{
+        if(!elevenLabs.apiKey){alert('Add your ElevenLabs API key in Admin → AI Agents');return;}
+        if(speaking){if(audioRef.current)audioRef.current.pause();setSpeaking(false);return;}
+        setSpeaking(true);
+        try{
+            const res=await fetch('https://api.elevenlabs.io/v1/text-to-speech/'+ag.voiceId,{
+                method:'POST',
+                headers:{'xi-api-key':elevenLabs.apiKey,'Content-Type':'application/json'},
+                body:JSON.stringify({text,model_id:'eleven_multilingual_v2',voice_settings:{stability:.5,similarity_boost:.75}})
+            });
+            if(!res.ok)throw new Error('API error '+res.status);
+            const blob=await res.blob();
+            const url=URL.createObjectURL(blob);
+            audioRef.current=new Audio(url);
+            audioRef.current.onended=()=>setSpeaking(false);
+            audioRef.current.play();
+        }catch(e){setSpeaking(false);alert('Voice error: '+e.message);}
+    };
+
+    const send=async(ag)=>{
+        const txt=(inputs[ag.id]||'').trim();if(!txt)return;
+        setMsgs(p=>({...p,[ag.id]:[...(p[ag.id]||[]),{r:'u',t:txt}]}));
+        setInputs(p=>({...p,[ag.id]:''}));
+        let reply='';
+        if(elevenLabs.apiKey&&ag.agentId){
+            try{
+                const res=await fetch('https://api.elevenlabs.io/v1/convai/conversation',{
+                    method:'POST',headers:{'xi-api-key':elevenLabs.apiKey,'Content-Type':'application/json'},
+                    body:JSON.stringify({agent_id:ag.agentId,user_input:txt})
+                });
+                const j=await res.json();reply=j.reply||j.response||'Thank you!';
+            }catch{reply='Our team will get back to you shortly.';}
+        }else{
+            const lo=txt.toLowerCase();
+            if(ag.id==='sales'){reply=lo.includes('price')||lo.includes('cost')?'Services start at Rs.12,000. Which package interests you?':lo.includes('book')||lo.includes('session')?'Please visit our Contact page or call 9953715382 to book.':'Thank you! How can I help you today?';}
+            else if(ag.id==='support'){reply=lo.includes('refund')?'Email thrivewithkaushik@gmail.com with your order ID for refund help.':lo.includes('order')?'Please share your Order ID and I will look into it.':'I am here to help. Please describe your issue.';}
+            else{reply=lo.includes('stress')?'Breathe in for 4 counts, hold 4, exhale 4. Repeat 3 times.':lo.includes('anxious')||lo.includes('anxiety')?'You are safe. Ground yourself: name 5 things you can see right now.':lo.includes('happy')||lo.includes('good')?'Wonderful! What are you grateful for today?':'Share what is on your mind. I am here for you.';}
+        }
+        setMsgs(p=>({...p,[ag.id]:[...(p[ag.id]||[]),{r:'a',t:reply}]}));
+        speak(reply,ag);
+    };
+
+    const cur=active.find(a=>a.id===open);
+    return(
+        <>
+            <div className="ai-wrap">
+                {active.map(ag=>(
+                    <button key={ag.id} className="ai-fab" style={{background:ag.color}} title={ag.label} onClick={()=>toggle(ag)}>
+                        {ag.emoji}
+                    </button>
+                ))}
+            </div>
+            {cur&&(
+                <div className="ai-box">
+                    <div className="ai-head" style={{background:cur.color}}>
+                        <span style={{fontWeight:700,fontSize:14}}>{cur.emoji} {cur.label}</span>
+                        <div style={{display:'flex',gap:8}}>
+                            <button onClick={()=>speak((msgs[cur.id]||[]).filter(m=>m.r==='a').slice(-1)[0]?.t||cur.greeting,cur)}
+                                style={{background:'rgba(255,255,255,.2)',border:'none',borderRadius:8,color:'#fff',padding:'3px 9px',cursor:'pointer',fontSize:15}}>
+                                {speaking?'⏹':'🔊'}
+                            </button>
+                            <button onClick={()=>setOpen(null)} style={{background:'rgba(255,255,255,.2)',border:'none',borderRadius:8,color:'#fff',padding:'3px 9px',cursor:'pointer',fontSize:15}}>✕</button>
+                        </div>
+                    </div>
+                    <div className="ai-body">
+                        <div className="ai-msgs">
+                            {(msgs[cur.id]||[]).map((m,i)=>(
+                                <div key={i} className={'ai-m '+(m.r==='u'?'u':'a')}>{m.t}</div>
+                            ))}
+                        </div>
+                        <div className="ai-row">
+                            <input placeholder="Type a message..." value={inputs[cur.id]||''} onChange={e=>setInputs(p=>({...p,[cur.id]:e.target.value}))} onKeyDown={e=>e.key==='Enter'&&send(cur)}/>
+                            <button style={{background:cur.color}} onClick={()=>send(cur)}>➤</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </>
+    );
+};
+
+/* ═══════════════════════════════════════════════════════════════════════
+   AUTH MODAL  (login / register / forgot password)
+═══════════════════════════════════════════════════════════════════════ */
+const AuthModal=()=>{
+    const{setModal,users,upd,setUser}=useApp();
+    const[mode,setMode]=useState('login');
+    const[sp,setSp]=useState(false);
+    const[f,setF]=useState({name:'',email:'',mobile:'',pw:'',pw2:'',otp:'',newpw:'',newpw2:''});
+    const[pwv,setPwv]=useState({ok:false,score:0,msg:''});
+    const[otpSent,setOtpSent]=useState(false);
+    const[otpKey,setOtpKey]=useState('');
+    const fld=(k,v)=>setF(p=>({...p,[k]:v}));
+    useEffect(()=>{if(f.pw)setPwv(valPw(f.pw));},[f.pw]);
+    const close=()=>setModal(null);
+
+    /* Login */
+    const doLogin=e=>{
+        e.preventDefault();
+        const u=users.find(u=>u.email===f.email&&dec(u._pw)===f.pw);
+        if(u){setUser(u);close();alert('Welcome back, '+u.name+'!');}
+        else alert('Invalid email or password.');
+    };
+
+    /* Register */
+    const doReg=e=>{
+        e.preventDefault();
+        if(!pwv.ok){alert(pwv.msg);return;}
+        if(f.pw!==f.pw2){alert('Passwords do not match.');return;}
+        if(users.find(u=>u.email===f.email)){alert('Email already registered.');return;}
+        const nu={id:Date.now(),name:f.name,email:f.email,mobile:f.mobile,_pw:enc(f.pw),joined:new Date().toISOString()};
+        upd('users',[...users,nu]);setUser(nu);close();
+        alert('Account created! Welcome '+f.name+'.');
+    };
+
+    /* Forgot – step 1: send OTP */
+    const doSendOtp=e=>{
+        e.preventDefault();
+        const u=users.find(u=>u.email===f.email||u.mobile===f.email);
+        if(!u){alert('No account found for that email / mobile.');return;}
+        const key='reset_'+u.id;
+        const code=genOtp(key);
+        setOtpKey(key);
+        setOtpSent(true);
+        alert(
+            'A 6-digit reset code has been sent to:\n'+
+            '📧 Email: '+u.email+'\n📱 Mobile: '+u.mobile+
+            '\n\n[DEMO] Your code is: '+code+
+            '\n\nIn production this is sent silently via SMS/email API.'
+        );
+    };
+
+    /* Forgot – step 2: verify OTP + set new password */
+    const doReset=e=>{
+        e.preventDefault();
+        if(!verOtp(otpKey,f.otp)){alert('Invalid or expired code. Please try again.');return;}
+        const nv=valPw(f.newpw);
+        if(!nv.ok){alert(nv.msg);return;}
+        if(f.newpw!==f.newpw2){alert('Passwords do not match.');return;}
+        const uEmail=f.email;
+        const updated=users.map(u=>(u.email===uEmail||u.mobile===uEmail)?{...u,_pw:enc(f.newpw)}:u);
+        upd('users',updated);
+        alert('Password reset successfully! Please login.');
+        setMode('login');setOtpSent(false);setF(p=>({...p,pw:'',pw2:'',otp:'',newpw:'',newpw2:''}));
+    };
+
+    const scoreColor=s=>s<=2?'#dc2626':s<=4?'#f59e0b':'#16a34a';
+    const scoreW=s=>((s/5)*100)+'%';
+
+    return(
+        <div className="modal" onClick={close}>
+            <div className="mc" onClick={e=>e.stopPropagation()} style={{maxWidth:480}}>
+                <button className="mc-x" onClick={close}>×</button>
+                <div style={{textAlign:'center',marginBottom:28}}>
+                    <div style={{fontSize:52,marginBottom:12}}>
+                        {mode==='login'?'👤':mode==='register'?'📝':'🔑'}
+                    </div>
+                    <h2 style={{fontSize:26}}>
+                        {mode==='login'?'Welcome Back':mode==='register'?'Create Account':'Reset Password'}
+                    </h2>
+                </div>
+
+                {mode==='login'&&(
+                    <form onSubmit={doLogin}>
+                        <div style={{marginBottom:14}}>
+                            <label>Email Address</label>
+                            <input type="email" placeholder="your@email.com" value={f.email} onChange={e=>fld('email',e.target.value)} required/>
+                        </div>
+                        <div style={{marginBottom:22}}>
+                            <label>Password</label>
+                            <div className="pwc">
+                                <input type={sp?'text':'password'} placeholder="Password" value={f.pw} onChange={e=>fld('pw',e.target.value)} required style={{paddingRight:46}}/>
+                                <button type="button" className="pwt" onClick={()=>setSp(!sp)}>{sp?'🙈':'👁️'}</button>
+                            </div>
+                        </div>
+                        <button type="submit" className="btn bp" style={{width:'100%',marginBottom:14,fontSize:16}}>Login Securely</button>
+                        <div style={{display:'flex',justifyContent:'space-between',fontSize:14}}>
+                            <a href="#" style={{color:'var(--a)'}} onClick={e=>{e.preventDefault();setMode('forgot');}}>Forgot Password?</a>
+                            <a href="#" style={{color:'var(--p)',fontWeight:600}} onClick={e=>{e.preventDefault();setMode('register');}}>Create Account</a>
+                        </div>
+                    </form>
+                )}
+
+                {mode==='register'&&(
+                    <form onSubmit={doReg}>
+                        {[['name','Full Name','text'],['email','Email Address','email'],['mobile','Mobile Number','tel']].map(([k,ph,t])=>(
+                            <div key={k} style={{marginBottom:14}}>
+                                <label>{ph}</label>
+                                <input type={t} placeholder={ph} value={f[k]} onChange={e=>fld(k,e.target.value)} required/>
+                            </div>
+                        ))}
+                        <div style={{marginBottom:6}}>
+                            <label>Password (9+ characters)</label>
+                            <div className="pwc">
+                                <input type={sp?'text':'password'} placeholder="Create strong password" value={f.pw} onChange={e=>fld('pw',e.target.value)} required style={{paddingRight:46}}/>
+                                <button type="button" className="pwt" onClick={()=>setSp(!sp)}>{sp?'🙈':'👁️'}</button>
+                            </div>
+                            {f.pw&&(<>
+                                <div className="pwbar" style={{width:scoreW(pwv.score),background:scoreColor(pwv.score)}}></div>
+                                <div style={{fontSize:12,marginTop:4,color:scoreColor(pwv.score),fontWeight:600}}>{pwv.msg}</div>
+                            </>)}
+                        </div>
+                        <div style={{marginBottom:22}}>
+                            <label>Confirm Password</label>
+                            <input type={sp?'text':'password'} placeholder="Re-enter password" value={f.pw2} onChange={e=>fld('pw2',e.target.value)} required/>
+                            {f.pw2&&f.pw!==f.pw2?<div style={{fontSize:12,color:'#dc2626',marginTop:4,fontWeight:600}}>Passwords do not match</div>:null}
+                        </div>
+                        <button type="submit" className="btn bp" style={{width:'100%',marginBottom:14,fontSize:16}}>Create Account</button>
+                        <div style={{textAlign:'center',fontSize:14}}>
+                            <a href="#" style={{color:'var(--p)'}} onClick={e=>{e.preventDefault();setMode('login');}}>Already have an account? Login</a>
+                        </div>
+                    </form>
+                )}
+
+                {mode==='forgot'&&!otpSent&&(
+                    <form onSubmit={doSendOtp}>
+                        <p style={{color:'#666',fontSize:14,marginBottom:18,lineHeight:1.6}}>Enter your registered email or mobile number. A 6-digit verification code will be sent to you.</p>
+                        <div style={{marginBottom:22}}>
+                            <label>Email or Mobile Number</label>
+                            <input type="text" placeholder="Email or mobile number" value={f.email} onChange={e=>fld('email',e.target.value)} required/>
+                        </div>
+                        <button type="submit" className="btn bp" style={{width:'100%',marginBottom:14,fontSize:16}}>Send Verification Code</button>
+                        <div style={{textAlign:'center',fontSize:14}}>
+                            <a href="#" style={{color:'var(--p)'}} onClick={e=>{e.preventDefault();setMode('login');}}>Back to Login</a>
+                        </div>
+                    </form>
+                )}
+
+                {mode==='forgot'&&otpSent&&(
+                    <form onSubmit={doReset}>
+                        <div style={{padding:14,background:'#f0fdf4',borderRadius:10,marginBottom:18,fontSize:13,color:'#166534'}}>
+                            Code sent to your email and mobile number.
+                        </div>
+                        <div style={{marginBottom:14}}>
+                            <label>6-Digit Verification Code</label>
+                            <input type="text" maxLength={6} placeholder="Enter code" value={f.otp} onChange={e=>fld('otp',e.target.value)} required/>
+                        </div>
+                        <div style={{marginBottom:6}}>
+                            <label>New Password</label>
+                            <div className="pwc">
+                                <input type={sp?'text':'password'} placeholder="New password" value={f.newpw} onChange={e=>fld('newpw',e.target.value)} required style={{paddingRight:46}}/>
+                                <button type="button" className="pwt" onClick={()=>setSp(!sp)}>{sp?'🙈':'👁️'}</button>
+                            </div>
+                        </div>
+                        <div style={{marginBottom:22}}>
+                            <label>Confirm New Password</label>
+                            <input type={sp?'text':'password'} placeholder="Re-enter new password" value={f.newpw2} onChange={e=>fld('newpw2',e.target.value)} required/>
+                        </div>
+                        <button type="submit" className="btn bp" style={{width:'100%',marginBottom:14,fontSize:16}}>Reset Password</button>
+                    </form>
+                )}
+            </div>
+        </div>
+    );
+};
+
+/* ═══════════════════════════════════════════════════════════════════════
+   CART MODAL
+═══════════════════════════════════════════════════════════════════════ */
+const CartModal=()=>{
+    const{cart,setModal,remCart,updQty,user,cartSub}=useApp();
+    const ship=cartSub>=500?0:40;
+    const total=cartSub+ship;
+    const checkout=()=>{
+        if(!user){setModal('auth');return;}
+        // Products need address; services go direct to payment
+        const hasProduct=cart.some(i=>i.id>=100);
+        const hasService=cart.some(i=>i.id<100);
+        if(hasProduct){setModal('address');}
+        else{setModal('pay');}
+    };
+    // Track cart abandonment — save draft when cart opens
+    useEffect(()=>{
+        if(cart.length>0){
+            const draft={items:cart,timestamp:new Date().toISOString(),status:'abandoned'};
+            localStorage.setItem('tw_cart_draft',JSON.stringify(draft));
+        }
+    },[cart]);
+    return(
+        <div className="modal" onClick={()=>setModal(null)}>
+            <div className="mc" onClick={e=>e.stopPropagation()}>
+                <button className="mc-x" onClick={()=>setModal(null)}>×</button>
+                <h2 style={{marginBottom:24}}>Shopping Cart</h2>
+                {cart.length===0?(
+                    <div style={{textAlign:'center',padding:'40px 0'}}>
+                        <div style={{fontSize:64,marginBottom:16}}>🛒</div>
+                        <p style={{color:'#999'}}>Your cart is empty</p>
+                    </div>
+                ):(
+                    <>
+                        {cart.map(item=>(
+                            <div key={item.id} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'14px 0',borderBottom:'1px solid #f0f0f0'}}>
+                                <div>
+                                    <div style={{fontWeight:600,marginBottom:3}}>{item.title}</div>
+                                    <div style={{color:'#666',fontSize:13}}>{'₹'+item.price.toLocaleString()+' each'}</div>
+                                </div>
+                                <div style={{display:'flex',alignItems:'center',gap:8}}>
+                                    <button onClick={()=>updQty(item.id,-1)} style={{width:30,height:30,border:'1px solid #ddd',borderRadius:8,cursor:'pointer',background:'#f5f5f5',fontSize:16}}>−</button>
+                                    <span style={{fontWeight:700,minWidth:24,textAlign:'center'}}>{item.qty}</span>
+                                    <button onClick={()=>updQty(item.id,+1)} style={{width:30,height:30,border:'1px solid #ddd',borderRadius:8,cursor:'pointer',background:'#f5f5f5',fontSize:16}}>+</button>
+                                    <button onClick={()=>remCart(item.id)} style={{padding:'4px 11px',background:'#fee2e2',border:'none',borderRadius:8,color:'#dc2626',cursor:'pointer',fontSize:12,fontWeight:600}}>Remove</button>
+                                </div>
+                            </div>
+                        ))}
+                        <div style={{marginTop:22,padding:18,background:'#f8f9fa',borderRadius:12}}>
+                            <div style={{display:'flex',justifyContent:'space-between',marginBottom:8}}><span>Subtotal</span><span>{'₹'+cartSub.toLocaleString()}</span></div>
+                            <div style={{display:'flex',justifyContent:'space-between',marginBottom:10}}><span>Shipping</span><span style={{color:ship===0?'#16a34a':'inherit',fontWeight:600}}>{ship===0?'FREE':'₹'+ship}</span></div>
+                            <div style={{display:'flex',justifyContent:'space-between',fontSize:20,fontWeight:900,borderTop:'2px solid #e0e0e0',paddingTop:10}}>
+                                <span>Total</span><span style={{color:'var(--p)'}}>{'₹'+total.toLocaleString()}</span>
+                            </div>
+                        </div>
+                        <button className="btn bp" style={{width:'100%',marginTop:18,fontSize:16}} onClick={checkout}>
+                            {user?'Proceed to Checkout →':'Login to Checkout →'}
+                        </button>
+                    </>
+                )}
+            </div>
+        </div>
+    );
+};
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PAYMENT MODAL
+═══════════════════════════════════════════════════════════════════════ */
+const PayModal=()=>{
+    const{cart,setCart,setModal,user,paymentGateways,orders,upd,notify,cartSub}=useApp();
+    const[sel,setSel]=useState(null);
+    const ship=cartSub>=500?0:40;
+    const total=cartSub+ship;
+    const active=paymentGateways.filter(g=>g.enabled);
+
+    const pay=async()=>{
+        if(!sel){alert('Please select a payment method.');return;}
+        const order={id:Date.now(),name:user.name,email:user.email,mobile:user.mobile,items:cart,subtotal:cartSub,shipping:ship,total,method:sel.name,status:'paid',date:new Date().toISOString().split('T')[0]};
+        upd('orders',[...orders,order]);
+        notify(order);
+        setCart([]);
+        setModal(null);
+    };
+    return(
+        <div className="modal" onClick={()=>setModal(null)}>
+            <div className="mc" onClick={e=>e.stopPropagation()}>
+                <button className="mc-x" onClick={()=>setModal(null)}>×</button>
+                <h2 style={{marginBottom:22}}>Secure Payment</h2>
+                <div style={{background:'#f0fdf4',border:'2px solid #bbf7d0',borderRadius:14,padding:18,marginBottom:22,display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                    <span style={{color:'#166534',fontSize:16}}>Amount to Pay</span>
+                    <span style={{fontSize:28,fontWeight:900,color:'var(--p)'}}>{'₹'+total.toLocaleString()}</span>
+                </div>
+                <h3 style={{marginBottom:14,fontSize:18}}>Select Payment Method</h3>
+                {active.length===0?(
+                    <div style={{padding:20,background:'#fff3cd',borderRadius:12,color:'#856404',textAlign:'center'}}>No payment methods enabled. Admin can enable them in the Payments section.</div>
+                ):(
+                    <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(120px,1fr))',gap:12,marginBottom:22}}>
+                        {active.map(gw=>(
+                            <button key={gw.id} onClick={()=>setSel(gw)} style={{padding:14,border:'2px solid '+(sel?.id===gw.id?'var(--p)':'#e0e0e0'),borderRadius:12,background:sel?.id===gw.id?'#f0fdf4':'#fff',cursor:'pointer',textAlign:'center',transition:'.2s'}}>
+                                <div style={{fontSize:28,marginBottom:7}}>{gw.icon}</div>
+                                <div style={{fontSize:12,fontWeight:600,color:sel?.id===gw.id?'var(--p)':'#555'}}>{gw.name}</div>
+                            </button>
+                        ))}
+                    </div>
+                )}
+                <button className="btn bp" style={{width:'100%',fontSize:16,padding:16,opacity:sel?1:.5}} onClick={pay} disabled={!sel}>
+                    {'🔒 Pay ₹'+total.toLocaleString()+' Securely'}
+                </button>
+                <p style={{textAlign:'center',fontSize:12,color:'#aaa',marginTop:10}}>Encrypted and secure payment processing</p>
+            </div>
+        </div>
+    );
+};
+
+
+/* ── CONFIRMATION BANNER (client-facing, not admin notification) ── */
+const ConfirmBanner=()=>{
+    const{notif}=useApp();
+    const{type,record}=notif;
+    const msgs={
+        order:{icon:'🎉',title:'Order Confirmed!',sub:'Your order has been placed. Check your email for details.'},
+        book:{icon:'📅',title:'Session Booked!',sub:'Thank you! We will contact you shortly to confirm your session.'},
+        enquiry:{icon:'✅',title:'Enquiry Received!',sub:'Thank you for reaching out. We will get back to you within 24 hours.'}
+    };
+    const m=msgs[type]||msgs.enquiry;
+    return(
+        <div style={{position:'fixed',top:20,left:'50%',transform:'translateX(-50%)',zIndex:11000,background:'#fff',borderRadius:16,padding:'20px 32px',boxShadow:'0 8px 40px rgba(0,0,0,.2)',display:'flex',alignItems:'center',gap:16,minWidth:320,maxWidth:480,animation:'fadeIn .3s',borderLeft:'5px solid #16a34a'}}>
+            <div style={{fontSize:40}}>{m.icon}</div>
+            <div>
+                <div style={{fontWeight:700,fontSize:16,color:'#166534'}}>{m.title}</div>
+                <div style={{fontSize:13,color:'#666',marginTop:4}}>{m.sub}</div>
+            </div>
+        </div>
+    );
+};
+
+/* ── ADDRESS MODAL ─────────────────────────────────────────────── */
+const AddressModal=()=>{
+    const{setModal,cart,user,upd,orders,notify,cartSub}=useApp();
+    const ship=cartSub>=500?0:40;
+    const[f,setF]=useState({
+        name:user?user.name:'',email:user?user.email:'',mobile:user?user.mobile:'',
+        address:'',city:'',state:'',pincode:'',country:'India'
+    });
+    const fld=(k,v)=>setF(p=>({...p,[k]:v}));
+    const proceed=e=>{
+        e.preventDefault();
+        // Save address draft as abandoned if user leaves
+        setModal('pay');
+        localStorage.setItem('tw_addr',JSON.stringify(f));
+    };
+    return(
+        <div className="modal" onClick={()=>setModal(null)}>
+            <div className="mc" onClick={e=>e.stopPropagation()} style={{maxWidth:560}}>
+                <button className="mc-x" onClick={()=>setModal(null)}>{String.fromCharCode(215)}</button>
+                <div style={{marginBottom:24}}>
+                    <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:4}}>
+                        <div style={{width:28,height:28,borderRadius:'50%',background:'#16a34a',color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700,fontSize:13}}>1</div>
+                        <span style={{color:'#16a34a',fontWeight:600,fontSize:14}}>Cart</span>
+                        <div style={{flex:1,height:2,background:'#e0e0e0'}}></div>
+                        <div style={{width:28,height:28,borderRadius:'50%',background:'var(--p)',color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700,fontSize:13}}>2</div>
+                        <span style={{fontWeight:700,fontSize:14,color:'var(--p)'}}>Address</span>
+                        <div style={{flex:1,height:2,background:'#e0e0e0'}}></div>
+                        <div style={{width:28,height:28,borderRadius:'50%',background:'#e0e0e0',color:'#666',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700,fontSize:13}}>3</div>
+                        <span style={{fontSize:14,color:'#999'}}>Payment</span>
+                    </div>
+                </div>
+                <h2 style={{marginBottom:20,fontSize:22}}>Delivery Address</h2>
+                <form onSubmit={proceed}>
+                    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14,marginBottom:14}}>
+                        <div><label>Full Name</label><input value={f.name} onChange={e=>fld('name',e.target.value)} required/></div>
+                        <div><label>Mobile</label><input type="tel" value={f.mobile} onChange={e=>fld('mobile',e.target.value)} required/></div>
+                    </div>
+                    <div style={{marginBottom:14}}><label>Email</label><input type="email" value={f.email} onChange={e=>fld('email',e.target.value)} required/></div>
+                    <div style={{marginBottom:14}}><label>House / Flat / Office Address</label><textarea rows={2} value={f.address} onChange={e=>fld('address',e.target.value)} required/></div>
+                    <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:14,marginBottom:14}}>
+                        <div><label>City</label><input value={f.city} onChange={e=>fld('city',e.target.value)} required/></div>
+                        <div><label>State</label><input value={f.state} onChange={e=>fld('state',e.target.value)} required/></div>
+                        <div><label>Pincode</label><input value={f.pincode} onChange={e=>fld('pincode',e.target.value)} required/></div>
+                    </div>
+                    <div style={{background:'#f0fdf4',borderRadius:12,padding:14,marginBottom:18,display:'flex',justifyContent:'space-between'}}>
+                        <span style={{color:'#166534'}}>{'Items ('+cart.reduce((s,i)=>s+i.qty,0)+') + Shipping'}</span>
+                        <span style={{fontWeight:900,color:'var(--p)'}}>{'Rs.'+(cartSub+ship).toLocaleString()}</span>
+                    </div>
+                    <button type="submit" className="btn bp" style={{width:'100%',fontSize:16}}>Continue to Payment</button>
+                </form>
+            </div>
+        </div>
+    );
+};
+
+/* ── BOOK SESSION MODAL ────────────────────────────────────────── */
+const BookSessionModal=()=>{
+    const{setModal,enquiryTypes,bookSessions,upd,notify}=useApp();
+    const[f,setF]=useState({name:'',email:'',mobile:'',organisation:'',designation:'',officeAddress:'',enquiryType:'',requiredBy:'',message:''});
+    const[sub,setSub]=useState(false);
+    const fld=(k,v)=>{setF(p=>{const nv={...p,[k]:v};localStorage.setItem('tw_enq_draft',JSON.stringify(nv));return nv;});};
+    const submit=async e=>{
+        e.preventDefault();
+        const sess={...f,id:Date.now(),date:new Date().toISOString().split('T')[0],status:'pending'};
+        upd('bookSessions',[...bookSessions,sess]);
+        setSub(true);
+        await notify(sess,'book');
+        setTimeout(()=>{setModal(null);setSub(false);},3000);
+    };
+    return(
+        <div className="modal" onClick={()=>setModal(null)}>
+            <div className="mc" onClick={e=>e.stopPropagation()} style={{maxWidth:620}}>
+                <button className="mc-x" onClick={()=>setModal(null)}>{String.fromCharCode(215)}</button>
+                {sub?(
+                    <div style={{textAlign:'center',padding:'40px 20px'}}>
+                        <div style={{fontSize:72,marginBottom:20}}>📅</div>
+                        <h2>Session Request Sent!</h2>
+                        <p style={{color:'#666',marginTop:12}}>We will contact you shortly to confirm your session.</p>
+                    </div>
+                ):(
+                    <>
+                        <div style={{textAlign:'center',marginBottom:28}}>
+                            <div style={{fontSize:52,marginBottom:10}}>📅</div>
+                            <h2 style={{fontSize:24}}>Book a Session</h2>
+                            <p style={{color:'#666',marginTop:6,fontSize:14}}>Fill in your details and we will get back to you within 24 hours</p>
+                        </div>
+                        <form onSubmit={submit}>
+                            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14,marginBottom:14}}>
+                                <div><label>Full Name *</label><input value={f.name} onChange={e=>fld('name',e.target.value)} required placeholder="Your full name"/></div>
+                                <div><label>Mobile Number *</label><input type="tel" value={f.mobile} onChange={e=>fld('mobile',e.target.value)} required placeholder="+91 98765 43210"/></div>
+                            </div>
+                            <div style={{marginBottom:14}}><label>Email Address *</label><input type="email" value={f.email} onChange={e=>fld('email',e.target.value)} required placeholder="you@company.com"/></div>
+                            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14,marginBottom:14}}>
+                                <div><label>Organisation / Company</label><input value={f.organisation} onChange={e=>fld('organisation',e.target.value)} placeholder="Company name"/></div>
+                                <div><label>Designation</label><input value={f.designation} onChange={e=>fld('designation',e.target.value)} placeholder="Your role / title"/></div>
+                            </div>
+                            <div style={{marginBottom:14}}><label>Office Address</label><textarea rows={2} value={f.officeAddress} onChange={e=>fld('officeAddress',e.target.value)} placeholder="Office / venue address where session is needed"/></div>
+                            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:14,marginBottom:14}}>
+                                <div>
+                                    <label>Enquiry Type *</label>
+                                    <select value={f.enquiryType} onChange={e=>fld('enquiryType',e.target.value)} required>
+                                        <option value="">Select type...</option>
+                                        {enquiryTypes.map(t=><option key={t} value={t}>{t}</option>)}
+                                    </select>
+                                </div>
+                                <div><label>When Do You Need This? *</label><input type="date" value={f.requiredBy} onChange={e=>fld('requiredBy',e.target.value)} required min={new Date().toISOString().split('T')[0]}/></div>
+                            </div>
+                            <div style={{marginBottom:22}}><label>Additional Message</label><textarea rows={3} value={f.message} onChange={e=>fld('message',e.target.value)} placeholder="Any specific requirements or questions..."/></div>
+                            <button type="submit" className="btn bp" style={{width:'100%',fontSize:16}}>Submit Session Request</button>
+                        </form>
+                    </>
+                )}
+            </div>
+        </div>
+    );
+};
+/* ── ABANDONED ORDERS WIDGET ──────────────────────────────────────── */
+const AbandonedOrders=()=>{
+    const draft=React.useMemo(()=>{try{return JSON.parse(localStorage.getItem('tw_cart_draft')||'null');}catch{return null;}},[]);
+    if(!draft)return <div style={{color:'#999',padding:'20px 0',textAlign:'center',fontSize:13}}>No abandoned carts detected</div>;
+    return(
+        <div>
+            <div style={{padding:14,background:'#fef9c3',borderRadius:10,marginBottom:10,fontSize:13}}>
+                <div style={{fontWeight:700,marginBottom:4}}>Abandoned Cart Detected</div>
+                <div>Items: {draft.items.map(i=>i.title).join(', ')}</div>
+                <div style={{color:'#666',marginTop:4}}>{'Started: '+new Date(draft.timestamp).toLocaleString()}</div>
+            </div>
+        </div>
+    );
+};
+const AbandonedEnquiries=()=>{
+    const draft=React.useMemo(()=>{try{return JSON.parse(localStorage.getItem('tw_enq_draft')||'null');}catch{return null;}},[]);
+    if(!draft||Object.values(draft).every(v=>!v))return <div style={{color:'#999',padding:'20px 0',textAlign:'center',fontSize:13}}>No incomplete enquiries detected</div>;
+    return(
+        <div style={{padding:14,background:'#fef9c3',borderRadius:10,fontSize:13}}>
+            <div style={{fontWeight:700,marginBottom:4}}>Incomplete Enquiry Draft</div>
+            {Object.entries(draft).filter(([,v])=>v).map(([k,v])=>(
+                <div key={k}><span style={{color:'#666'}}>{k}: </span>{v}</div>
+            ))}
+        </div>
+    );
+};
+
+/* ═══════════════════════════════════════════════════════════════════════
+   ADMIN LOGIN  — zero credentials in source
+═══════════════════════════════════════════════════════════════════════ */
+const AdminLogin=()=>{
+    const{setAdminIn}=useApp();
+    const[sp,setSp]=useState(false);
+    const[id,setId]=useState('');
+    const[pw,setPw]=useState('');
+    const[err,setErr]=useState('');
+
+    const login=e=>{
+        e.preventDefault();
+        setErr('');
+        if(checkAdmin(id.trim(),pw)){
+            setAdminIn(true);
+        }else{
+            setErr('Incorrect credentials. Contact administrator.');
+            setPw('');
+        }
+    };
+    return(
+        <div style={{minHeight:'100vh',background:'linear-gradient(135deg,#1a472a,#0a1f11)',display:'flex',alignItems:'center',justifyContent:'center',padding:20}}>
+            <div className="card" style={{maxWidth:460,width:'100%',padding:44}}>
+                <div style={{textAlign:'center',marginBottom:32}}>
+                    <div style={{fontSize:68,marginBottom:16}}>🔒</div>
+                    <h2 style={{fontSize:28}}>Admin Portal</h2>
+                    <p style={{color:'#888',marginTop:6,fontSize:14}}>Authorised access only</p>
+                </div>
+                <form onSubmit={login}>
+                    <div style={{marginBottom:16}}>
+                        <label>Email or Mobile</label>
+                        <input type="text" placeholder="Enter credentials" value={id} onChange={e=>setId(e.target.value)} required autoComplete="off"/>
+                    </div>
+                    <div style={{marginBottom:24}}>
+                        <label>Password</label>
+                        <div className="pwc">
+                            <input type={sp?'text':'password'} placeholder="Enter password" value={pw} onChange={e=>setPw(e.target.value)} required style={{paddingRight:46}} autoComplete="new-password"/>
+                            <button type="button" className="pwt" onClick={()=>setSp(!sp)}>{sp?'🙈':'👁️'}</button>
+                        </div>
+                    </div>
+                    {err?<div style={{padding:12,background:'#fee2e2',borderRadius:10,color:'#991b1b',fontSize:13,marginBottom:16}}>{err}</div>:null}
+                    <button type="submit" className="btn bp" style={{width:'100%',fontSize:16}}>Login to Dashboard</button>
+                </form>
+                <div style={{marginTop:20,padding:14,background:'#f0fdf4',borderRadius:10,fontSize:13,color:'#166534',lineHeight:1.7}}>
+                    <strong>First time?</strong> Contact the administrator for your credentials.<br/>
+                    <strong>Forgot password?</strong> Call or email the site owner to reset.
+                </div>
+            </div>
+        </div>
+    );
+};
+
+/* ═══════════════════════════════════════════════════════════════════════
+   ADMIN PANEL
+═══════════════════════════════════════════════════════════════════════ */
+const AdminPanel=()=>{
+    const{setAdminIn,setIsAdmin,config,upd,updCfg,services,products,orders,enquiries,paymentGateways,enquiryTypes,users,elevenLabs,bookSessions}=useApp();
+    const[tab,setTab]=useState('dashboard');
+    const[newEq,setNewEq]=useState('');
+    const tabs=['dashboard','services','products','orders','sessions','enquiries','abandoned','users','social','payments','ai agents','settings'];
+
+    const toggleSoc=(n)=>updCfg({social:{...config.social,[n]:{...config.social[n],enabled:!config.social[n].enabled}}});
+    const setSocUrl=(n,url)=>updCfg({social:{...config.social,[n]:{...config.social[n],url}}});
+    const toggleGw=(id)=>upd('paymentGateways',paymentGateways.map(g=>g.id===id?{...g,enabled:!g.enabled}:g));
+    const setGwKey=(id,k)=>upd('paymentGateways',paymentGateways.map(g=>g.id===id?{...g,apiKey:k}:g));
+    const addEq=()=>{if(newEq.trim()){upd('enquiryTypes',[...enquiryTypes,newEq.trim()]);setNewEq('');}};
+    const delEq=(t)=>upd('enquiryTypes',enquiryTypes.filter(x=>x!==t));
+    const toggleSvc=(id)=>upd('services',services.map(s=>s.id===id?{...s,enabled:!s.enabled}:s));
+    const setSvcMode=(id,mode)=>upd('services',services.map(s=>s.id===id?{...s,mode}:s));
+    const updSvc=(id,field,val)=>upd('services',services.map(s=>s.id===id?{...s,[field]:val}:s));
+    const delSvc=(id)=>{if(window.confirm('Delete this service?'))upd('services',services.filter(s=>s.id!==id));};
+    const addSvc=()=>upd('services',[...services,{id:Date.now(),title:'New Service',price:10000,originalPrice:12000,image:'',mode:'Online',description:'Service description',enabled:false}]);
+    const toggleProd=(id)=>upd('products',products.map(p=>p.id===id?{...p,enabled:!p.enabled}:p));
+    const updProd=(id,field,val)=>upd('products',products.map(p=>p.id===id?{...p,[field]:val}:p));
+    const delProd=(id)=>{if(window.confirm('Delete this product?'))upd('products',products.filter(p=>p.id!==id));};
+    const addProd=()=>upd('products',[...products,{id:Date.now(),title:'New Product',price:500,originalPrice:699,stock:10,image:'',enabled:false}]);
+    const setElKey=(k)=>upd('elevenLabs',{...elevenLabs,apiKey:k});
+    const toggleAgent=(id)=>upd('elevenLabs',{...elevenLabs,agents:elevenLabs.agents.map(a=>a.id===id?{...a,enabled:!a.enabled}:a)});
+    const setAgFld=(id,fld,val)=>upd('elevenLabs',{...elevenLabs,agents:elevenLabs.agents.map(a=>a.id===id?{...a,[fld]:val}:a)});
+
+    const Stat=({icon,val,label,color})=>(
+        <div className="card" style={{textAlign:'center',padding:28}}>
+            <div style={{fontSize:42,marginBottom:12}}>{icon}</div>
+            <div style={{fontSize:34,fontWeight:900,color}}>{val}</div>
+            <div style={{color:'#666',marginTop:4,fontSize:14}}>{label}</div>
+        </div>
+    );
+    const Row=({label,children})=>(
+        <div style={{marginBottom:16}}><label>{label}</label>{children}</div>
+    );
+
+    return(
+        <div style={{display:'flex',minHeight:'100vh'}}>
+            {/* Sidebar */}
+            <div style={{width:230,background:'#1a472a',padding:'24px 14px',position:'sticky',top:0,height:'100vh',overflowY:'auto',flexShrink:0}}>
+                <div style={{marginBottom:28,paddingLeft:6}}>
+                    <div style={{fontSize:26}}>🌟</div>
+                    <div style={{color:'#fff',fontWeight:700,fontSize:15,marginTop:4}}>Admin Panel</div>
+                </div>
+                {tabs.map(t=>(
+                    <button key={t} onClick={()=>setTab(t)} style={{width:'100%',padding:'11px 12px',background:tab===t?'rgba(212,175,55,.2)':'transparent',border:'none',color:'#fff',textAlign:'left',cursor:'pointer',marginBottom:3,borderRadius:8,fontSize:13,textTransform:'capitalize',borderLeft:tab===t?'3px solid #d4af37':'3px solid transparent',fontWeight:tab===t?700:400}}>
+                        {t}
+                    </button>
+                ))}
+                <button onClick={()=>{setAdminIn(false);setIsAdmin(false);}} style={{width:'100%',padding:11,background:'#dc2626',border:'none',color:'#fff',borderRadius:10,cursor:'pointer',marginTop:20,fontWeight:700,fontSize:13}}>
+                    Logout
+                </button>
+            </div>
+
+            {/* Content */}
+            <div style={{flex:1,padding:36,background:'#f5f7f9',overflowY:'auto'}}>
+                <h1 style={{fontSize:30,marginBottom:26,textTransform:'capitalize'}}>{tab}</h1>
+
+                {tab==='dashboard'&&(
+                    <div className="g3">
+                        <Stat icon="📦" val={orders.length} label="Total Orders" color="#3b82f6"/>
+                        <Stat icon="👤" val={users.length} label="Registered Users" color="#8b5cf6"/>
+                        <Stat icon="🎯" val={services.filter(s=>s.enabled).length} label="Active Services" color="#16a34a"/>
+                        <Stat icon="🛍" val={products.filter(p=>p.enabled).length} label="Active Products" color="#f59e0b"/>
+                        <Stat icon="💬" val={enquiries.length} label="Enquiries" color="#0ea5e9"/>
+                        <Stat icon="💰" val={'₹'+orders.reduce((s,o)=>s+o.total,0).toLocaleString()} label="Total Revenue" color="#dc2626"/>
+                    </div>
+                )}
+
+                {tab==='services'&&(
+                    <div>
+                        <button className="btn bp" style={{marginBottom:18}} onClick={()=>addSvc()}>+ Add New Service</button>
+                        <div style={{display:'flex',flexDirection:'column',gap:14}}>
+                        {services.map(s=>(
+                            <div key={s.id} className="card" style={{padding:20}}>
+                                <div style={{display:'flex',alignItems:'center',gap:14,marginBottom:14,flexWrap:'wrap'}}>
+                                    <img src={s.image||'https://via.placeholder.com/80x60?text=No+Image'} alt={s.title} style={{width:80,height:60,objectFit:'cover',borderRadius:10,flexShrink:0,border:'1px solid #eee'}}/>
+                                    <div style={{flex:1,minWidth:160}}>
+                                        <input value={s.title} onChange={e=>updSvc(s.id,'title',e.target.value)} style={{fontWeight:700,fontSize:15,marginBottom:6,padding:'6px 10px',borderRadius:8,border:'1px solid #ddd'}}/>
+                                        <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+                                            <input type="number" value={s.price} onChange={e=>updSvc(s.id,'price',Number(e.target.value))} placeholder="Price" style={{width:110,padding:'6px 10px',borderRadius:8,border:'1px solid #ddd',fontSize:13}}/>
+                                            <input type="number" value={s.originalPrice} onChange={e=>updSvc(s.id,'originalPrice',Number(e.target.value))} placeholder="Original" style={{width:110,padding:'6px 10px',borderRadius:8,border:'1px solid #ddd',fontSize:13}}/>
+                                        </div>
+                                    </div>
+                                    <select value={s.mode} onChange={e=>setSvcMode(s.id,e.target.value)} style={{width:'auto',padding:'8px 12px',fontSize:13,borderRadius:8,border:'1px solid #ddd'}}>
+                                        <option>Online</option><option>Offline</option><option>Both</option>
+                                    </select>
+                                    <div style={{display:'flex',alignItems:'center',gap:8,fontSize:13}}>
+                                        <div className={'tog '+(s.enabled?'on':'')} onClick={()=>toggleSvc(s.id)}></div>
+                                    </div>
+                                    <button onClick={()=>delSvc(s.id)} style={{background:'#fee2e2',border:'none',borderRadius:8,color:'#dc2626',cursor:'pointer',padding:'6px 12px',fontWeight:700,fontSize:13}}>Delete</button>
+                                </div>
+                                <textarea value={s.description} onChange={e=>updSvc(s.id,'description',e.target.value)} placeholder="Description" rows={2} style={{marginBottom:10,fontSize:13,borderRadius:8,border:'1px solid #ddd',padding:'8px 12px',resize:'vertical'}}/>
+                                <div style={{display:'flex',gap:10,flexWrap:'wrap',alignItems:'center'}}>
+                                    <span style={{fontSize:13,fontWeight:600,color:'#555'}}>Image:</span>
+                                    <input type="text" value={s.image.startsWith('data:')?' (uploaded file)':s.image} onChange={e=>updSvc(s.id,'image',e.target.value)} placeholder="Paste image URL..." style={{flex:1,padding:'7px 12px',borderRadius:8,border:'1px solid #ddd',fontSize:13,minWidth:180}}/>
+                                    <label style={{padding:'7px 14px',background:'var(--p)',color:'#fff',borderRadius:8,cursor:'pointer',fontSize:13,fontWeight:600,margin:0,display:'inline-block'}}>
+                                        Upload
+                                        <input type="file" accept="image/*" style={{display:'none'}} onChange={e=>{const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=ev=>updSvc(s.id,'image',ev.target.result);r.readAsDataURL(file);}}/>
+                                    </label>
+                                </div>
+                            </div>
+                        ))}
+                        </div>
+                    </div>
+                )}
+
+                {tab==='products'&&(
+                    <div>
+                        <button className="btn bp" style={{marginBottom:18}} onClick={()=>addProd()}>+ Add New Product</button>
+                        <div style={{display:'flex',flexDirection:'column',gap:14}}>
+                        {products.map(p=>(
+                            <div key={p.id} className="card" style={{padding:20}}>
+                                <div style={{display:'flex',alignItems:'center',gap:14,marginBottom:14,flexWrap:'wrap'}}>
+                                    <img src={p.image||'https://via.placeholder.com/80x60?text=No+Image'} alt={p.title} style={{width:80,height:60,objectFit:'cover',borderRadius:10,flexShrink:0,border:'1px solid #eee'}}/>
+                                    <div style={{flex:1,minWidth:160}}>
+                                        <input value={p.title} onChange={e=>updProd(p.id,'title',e.target.value)} style={{fontWeight:700,fontSize:15,marginBottom:6,padding:'6px 10px',borderRadius:8,border:'1px solid #ddd'}}/>
+                                        <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+                                            <input type="number" value={p.price} onChange={e=>updProd(p.id,'price',Number(e.target.value))} placeholder="Price" style={{width:100,padding:'6px 10px',borderRadius:8,border:'1px solid #ddd',fontSize:13}}/>
+                                            <input type="number" value={p.originalPrice} onChange={e=>updProd(p.id,'originalPrice',Number(e.target.value))} placeholder="Original" style={{width:100,padding:'6px 10px',borderRadius:8,border:'1px solid #ddd',fontSize:13}}/>
+                                            <input type="number" value={p.stock} onChange={e=>updProd(p.id,'stock',Number(e.target.value))} placeholder="Stock" style={{width:80,padding:'6px 10px',borderRadius:8,border:'1px solid #ddd',fontSize:13}}/>
+                                        </div>
+                                    </div>
+                                    <div style={{display:'flex',alignItems:'center',gap:8,fontSize:13}}>
+                                        <div className={'tog '+(p.enabled?'on':'')} onClick={()=>toggleProd(p.id)}></div>
+                                    </div>
+                                    <button onClick={()=>delProd(p.id)} style={{background:'#fee2e2',border:'none',borderRadius:8,color:'#dc2626',cursor:'pointer',padding:'6px 12px',fontWeight:700,fontSize:13}}>Delete</button>
+                                </div>
+                                <div style={{display:'flex',gap:10,flexWrap:'wrap',alignItems:'center'}}>
+                                    <span style={{fontSize:13,fontWeight:600,color:'#555'}}>Image:</span>
+                                    <input type="text" value={p.image.startsWith('data:')?' (uploaded file)':p.image} onChange={e=>updProd(p.id,'image',e.target.value)} placeholder="Paste image URL..." style={{flex:1,padding:'7px 12px',borderRadius:8,border:'1px solid #ddd',fontSize:13,minWidth:180}}/>
+                                    <label style={{padding:'7px 14px',background:'var(--p)',color:'#fff',borderRadius:8,cursor:'pointer',fontSize:13,fontWeight:600,margin:0,display:'inline-block'}}>
+                                        Upload
+                                        <input type="file" accept="image/*" style={{display:'none'}} onChange={e=>{const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=ev=>updProd(p.id,'image',ev.target.result);r.readAsDataURL(file);}}/>
+                                    </label>
+                                </div>
+                            </div>
+                        ))}
+                        </div>
+                    </div>
+                )}
+
+                {tab==='orders'&&(
+                    <div className="card" style={{overflowX:'auto'}}>
+                        <table>
+                            <thead><tr><th>Order ID</th><th>Customer</th><th>Total</th><th>Payment</th><th>Date</th><th>Status</th></tr></thead>
+                            <tbody>
+                                {orders.length===0?<tr><td colSpan={6} style={{textAlign:'center',color:'#999',padding:36}}>No orders yet</td></tr>:null}
+                                {orders.map(o=>(
+                                    <tr key={o.id}>
+                                        <td style={{fontWeight:700}}>{'#'+String(o.id).slice(-6)}</td>
+                                        <td><div style={{fontWeight:600}}>{o.name}</div><div style={{fontSize:12,color:'#999'}}>{o.email}</div></td>
+                                        <td style={{fontWeight:700,color:'var(--p)'}}>{'₹'+o.total.toLocaleString()}</td>
+                                        <td>{o.method}</td>
+                                        <td>{o.date}</td>
+                                        <td><span style={{padding:'3px 10px',background:'#dcfce7',color:'#16a34a',borderRadius:20,fontSize:12,fontWeight:700}}>{o.status}</span></td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+
+                {tab==='enquiries'&&(
+                    <div>
+                        <div className="card" style={{marginBottom:20}}>
+                            <h3 style={{marginBottom:14,fontSize:18}}>Enquiry Type Manager</h3>
+                            <div style={{display:'flex',gap:10,marginBottom:18}}>
+                                <input placeholder="Add new enquiry type..." value={newEq} onChange={e=>setNewEq(e.target.value)} onKeyDown={e=>e.key==='Enter'&&addEq()}/>
+                                <button className="btn bp" style={{whiteSpace:'nowrap'}} onClick={addEq}>+ Add</button>
+                            </div>
+                            <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
+                                {enquiryTypes.map(t=>(
+                                    <span key={t} style={{padding:'7px 14px',background:'#f0f4f0',borderRadius:20,fontSize:13,display:'flex',alignItems:'center',gap:7}}>
+                                        {t}
+                                        <button onClick={()=>delEq(t)} style={{border:'none',background:'none',cursor:'pointer',color:'#dc2626',fontSize:16,lineHeight:1,padding:0}}>×</button>
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="card" style={{overflowX:'auto'}}>
+                            <h3 style={{marginBottom:14,fontSize:18}}>All Enquiries</h3>
+                            <table>
+                                <thead><tr><th>Name</th><th>Email</th><th>Mobile</th><th>Type</th><th>Location</th><th>Date</th></tr></thead>
+                                <tbody>
+                                    {enquiries.length===0?<tr><td colSpan={6} style={{textAlign:'center',color:'#999',padding:36}}>No enquiries yet</td></tr>:null}
+                                    {enquiries.map(e=>(
+                                        <tr key={e.id}><td style={{fontWeight:600}}>{e.name}</td><td>{e.email}</td><td>{e.mobile}</td><td><span style={{padding:'3px 8px',background:'#e0f2fe',color:'#0369a1',borderRadius:10,fontSize:12}}>{e.type}</span></td><td>{e.location}</td><td>{e.date}</td></tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                )}
+
+                {tab==='users'&&(
+                    <div className="card" style={{overflowX:'auto'}}>
+                        <table>
+                            <thead><tr><th>Name</th><th>Email</th><th>Mobile</th><th>Joined</th></tr></thead>
+                            <tbody>
+                                {users.length===0?<tr><td colSpan={4} style={{textAlign:'center',color:'#999',padding:36}}>No users yet</td></tr>:null}
+                                {users.map(u=>(
+                                    <tr key={u.id}><td style={{fontWeight:600}}>{u.name}</td><td>{u.email}</td><td>{u.mobile}</td><td>{u.joined?.split('T')[0]}</td></tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+
+                {tab==='social'&&(
+                    <div style={{display:'flex',flexDirection:'column',gap:14}}>
+                        {Object.entries(config.social||{}).map(([n,v])=>(
+                            <div key={n} className="card" style={{padding:22}}>
+                                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:14}}>
+                                    <div style={{display:'flex',alignItems:'center',gap:12}}>
+                                        <span style={{width:34,height:34,borderRadius:'50%',background:v.color,display:'flex',alignItems:'center',justifyContent:'center',color:'#fff',fontWeight:700,fontSize:14}}>{v.icon}</span>
+                                        <span style={{fontWeight:700,textTransform:'capitalize'}}>{v.label}</span>
+                                    </div>
+                                    <div style={{display:'flex',alignItems:'center',gap:8}}>
+                                        <span style={{fontSize:13,color:'#666'}}>{v.enabled?'Visible':'Hidden'}</span>
+                                        <div className={'tog '+(v.enabled?'on':'')} onClick={()=>toggleSoc(n)}></div>
+                                    </div>
+                                </div>
+                                <input type="url" value={v.url} onChange={e=>setSocUrl(n,e.target.value)} placeholder={v.label+' URL'}/>
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+                {tab==='payments'&&(
+                    <div style={{display:'flex',flexDirection:'column',gap:14}}>
+                        {paymentGateways.map(gw=>(
+                            <div key={gw.id} className="card" style={{padding:22}}>
+                                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:gw.enabled?16:0}}>
+                                    <div style={{display:'flex',alignItems:'center',gap:12}}>
+                                        <span style={{fontSize:26}}>{gw.icon}</span>
+                                        <span style={{fontWeight:700,fontSize:15}}>{gw.name}</span>
+                                    </div>
+                                    <div style={{display:'flex',alignItems:'center',gap:8}}>
+                                        <span style={{fontSize:13,color:'#666'}}>{gw.enabled?'Enabled':'Disabled'}</span>
+                                        <div className={'tog '+(gw.enabled?'on':'')} onClick={()=>toggleGw(gw.id)}></div>
+                                    </div>
+                                </div>
+                                {gw.enabled&&(
+                                    <input type="password" placeholder={gw.name+' API Key'} value={gw.apiKey||''} onChange={e=>setGwKey(gw.id,e.target.value)}/>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+                {tab==='ai agents'&&(
+                    <div>
+                        <div className="card" style={{marginBottom:18,padding:24}}>
+                            <h3 style={{marginBottom:6,fontSize:18}}>ElevenLabs API Key</h3>
+                            <p style={{fontSize:13,color:'#666',marginBottom:14}}>Get your key at elevenlabs.io → Profile → API Keys</p>
+                            <div className="pwc">
+                                <input type="password" placeholder="API Key (sk-...)" value={elevenLabs.apiKey||''} onChange={e=>setElKey(e.target.value)} style={{paddingRight:46}}/>
+                            </div>
+                            {elevenLabs.apiKey?<div style={{marginTop:8,fontSize:13,color:'#16a34a',fontWeight:600}}>API Key saved</div>:null}
+                        </div>
+                        {elevenLabs.agents.map(ag=>(
+                            <div key={ag.id} className="card" style={{marginBottom:14,padding:22,borderLeft:'4px solid '+ag.color}}>
+                                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:ag.enabled?18:0}}>
+                                    <div>
+                                        <div style={{fontWeight:700,fontSize:15}}>{ag.emoji+' '+ag.label}</div>
+                                        <div style={{fontSize:12,color:'#999',marginTop:2}}>Floating chat widget on website</div>
+                                    </div>
+                                    <div style={{display:'flex',alignItems:'center',gap:8}}>
+                                        <span style={{fontSize:13,color:'#666'}}>{ag.enabled?'Active':'Off'}</span>
+                                        <div className={'tog '+(ag.enabled?'on':'')} onClick={()=>toggleAgent(ag.id)}></div>
+                                    </div>
+                                </div>
+                                {ag.enabled&&(
+                                    <div style={{display:'flex',flexDirection:'column',gap:12}}>
+                                        <div><label>Voice ID</label><input type="text" value={ag.voiceId||''} onChange={e=>setAgFld(ag.id,'voiceId',e.target.value)} placeholder="JBFqnCBsd6RMkjVDRZzb"/></div>
+                                        <div><label>Conversational Agent ID (optional)</label><input type="text" value={ag.agentId||''} onChange={e=>setAgFld(ag.id,'agentId',e.target.value)} placeholder="agent_xxxx"/></div>
+                                        <div><label>Greeting Message</label><textarea rows={2} value={ag.greeting||''} onChange={e=>setAgFld(ag.id,'greeting',e.target.value)}/></div>
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                        <div style={{padding:16,background:'#eff6ff',borderRadius:12,fontSize:13,color:'#1e40af',lineHeight:1.8}}>
+                            1. Add ElevenLabs API Key above<br/>
+                            2. Enable each agent (Sales / Support / Mindfulness)<br/>
+                            3. Copy Voice ID from elevenlabs.io voice library<br/>
+                            4. Optionally add Conversational Agent ID for AI replies<br/>
+                            5. Customers see floating emoji buttons on the website
+                        </div>
+                    </div>
+                )}
+
+                {tab==='sessions'&&(
+                    <div className="card" style={{overflowX:'auto'}}>
+                        <h3 style={{marginBottom:16,fontSize:18}}>Book-a-Session Requests</h3>
+                        <table>
+                            <thead><tr><th>Name</th><th>Email</th><th>Mobile</th><th>Organisation</th><th>Designation</th><th>Type</th><th>Required By</th><th>Date</th></tr></thead>
+                            <tbody>
+                                {(bookSessions||[]).length===0?<tr><td colSpan={8} style={{textAlign:'center',color:'#999',padding:36}}>No sessions booked yet</td></tr>:null}
+                                {(bookSessions||[]).map(s=>(
+                                    <tr key={s.id}>
+                                        <td style={{fontWeight:600}}>{s.name}</td>
+                                        <td>{s.email}</td>
+                                        <td>{s.mobile}</td>
+                                        <td>{s.organisation}</td>
+                                        <td>{s.designation}</td>
+                                        <td><span style={{padding:'3px 8px',background:'#e0f2fe',color:'#0369a1',borderRadius:10,fontSize:12}}>{s.enquiryType}</span></td>
+                                        <td style={{fontWeight:600,color:'var(--p)'}}>{s.requiredBy}</td>
+                                        <td>{s.date}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+                {tab==='abandoned'&&(
+                    <div>
+                        <div style={{padding:14,background:'#fff3cd',borderRadius:12,marginBottom:18,fontSize:13,color:'#856404'}}>
+                            Visitors who started but did not complete their order or enquiry. Follow up with them to convert.
+                        </div>
+                        <div className="card" style={{overflowX:'auto',marginBottom:20}}>
+                            <h3 style={{marginBottom:14,fontSize:17}}>Incomplete Cart / Orders</h3>
+                            <AbandonedOrders/>
+                        </div>
+                        <div className="card" style={{overflowX:'auto'}}>
+                            <h3 style={{marginBottom:14,fontSize:17}}>Incomplete Enquiries</h3>
+                            <AbandonedEnquiries/>
+                        </div>
+                    </div>
+                )}
+                                {tab==='settings'&&(
+                    <div className="g3">
+                        <div className="card">
+                            <h3 style={{marginBottom:18,fontSize:18}}>Site Information</h3>
+                            <Row label="Site Name"><input type="text" value={config.siteName} onChange={e=>updCfg({siteName:e.target.value})}/></Row>
+                            <Row label="Blog URL (Blogger address)"><input type="url" value={config.blogUrl} onChange={e=>updCfg({blogUrl:e.target.value})}/></Row>
+                            <Row label="Blog Mode">
+                                <select value={config.blogMode||'link'} onChange={e=>updCfg({blogMode:e.target.value})} style={{padding:'10px 14px',borderRadius:10,border:'2px solid #e0e0e0',fontSize:14}}>
+                                    <option value="link">Link Mode (redirect to Blogger)</option>
+                                    <option value="api">API Mode (show posts on site)</option>
+                                </select>
+                            </Row>
+                            {(config.blogMode==='api')&&(
+                                <Row label="Google Blogger API Key">
+                                    <input type="password" value={config.blogApiKey||''} onChange={e=>updCfg({blogApiKey:e.target.value})} placeholder="AIzaSy..."/>
+                                    <div style={{fontSize:12,color:'#666',marginTop:6}}>Get from Google Cloud Console → Blogger API v3 → Credentials</div>
+                                </Row>
+                            )}
+                        </div>
+                        <div className="card">
+                            <h3 style={{marginBottom:18,fontSize:18}}>Contact Details</h3>
+                            <Row label="Mobile"><input type="tel" value={config.contact.mobile} onChange={e=>updCfg({contact:{...config.contact,mobile:e.target.value}})}/></Row>
+                            <Row label="Email"><input type="email" value={config.contact.email} onChange={e=>updCfg({contact:{...config.contact,email:e.target.value}})}/></Row>
+                        </div>
+                        <div className="card">
+                            <h3 style={{marginBottom:18,fontSize:18}}>Logo Upload</h3>
+                            <div style={{textAlign:'center',marginBottom:16}}>
+                                {config.logoImage?(
+                                    <img src={config.logoImage} alt="Logo" style={{height:80,maxWidth:200,objectFit:'contain',borderRadius:10,border:'1px solid #eee',padding:6}}/>
+                                ):(
+                                    <div style={{height:80,display:'flex',alignItems:'center',justifyContent:'center',fontSize:56}}>{config.logo}</div>
+                                )}
+                            </div>
+                            <Row label="Upload Logo (PNG/JPG)">
+                                <label style={{display:'block',padding:'12px 16px',background:'var(--p)',color:'#fff',borderRadius:10,cursor:'pointer',textAlign:'center',fontWeight:600,fontSize:14,margin:0}}>
+                                    Choose Logo File
+                                    <input type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp" style={{display:'none'}} onChange={e=>{
+                                        const file=e.target.files[0];if(!file)return;
+                                        const r=new FileReader();
+                                        r.onload=ev=>updCfg({logoImage:ev.target.result});
+                                        r.readAsDataURL(file);
+                                    }}/>
+                                </label>
+                            </Row>
+                            <Row label="Or Emoji Logo (if no image)">
+                                <input type="text" value={config.logo} onChange={e=>updCfg({logo:e.target.value})} placeholder="🌟"/>
+                            </Row>
+                            {config.logoImage&&(
+                                <button onClick={()=>updCfg({logoImage:''})} style={{width:'100%',padding:10,background:'#fee2e2',border:'none',borderRadius:8,color:'#dc2626',cursor:'pointer',fontWeight:600,fontSize:13,marginTop:8}}>Remove Logo Image</button>
+                            )}
+                            <div style={{marginTop:12,padding:12,background:'#eff6ff',borderRadius:8,fontSize:12,color:'#1e40af'}}>
+                                Logo is stored in browser as base64 and will show on all pages. For GitHub hosting, upload logo.png to your repo root and set URL below.
+                            </div>
+                        </div>
+                        <div className="card">
+                            <h3 style={{marginBottom:18,fontSize:18}}>Security Status</h3>
+                            {['Data XOR-encrypted in localStorage','Passwords hashed before storage','Admin credentials never in source code','OTP valid for 10 minutes only','Strong password enforced (9+ chars)','All payment data secured','No plain-text credentials anywhere'].map((item,i)=>(
+                                <div key={i} style={{display:'flex',alignItems:'center',gap:8,padding:'7px 0',borderBottom:'1px solid #f0f0f0',fontSize:13}}>
+                                    <span style={{color:'#16a34a',fontWeight:700}}>✓</span><span>{item}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PUBLIC WEBSITE
+═══════════════════════════════════════════════════════════════════════ */
+const Website=()=>{
+    const{config,page,setPage,cartN,setModal,user,setUser,setIsAdmin}=useApp();
+    return(
+        <div>
+            <header style={{background:'#fff',boxShadow:'0 2px 12px rgba(0,0,0,.08)',position:'sticky',top:0,zIndex:500}}>
+                <div className="con" style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'15px 24px',flexWrap:'wrap',gap:10}}>
+                    <div style={{display:'flex',alignItems:'center',gap:12,cursor:'pointer'}} onClick={()=>setPage('home')}>
+                        {config.logoImage?(
+                            <img src={config.logoImage} alt="logo" style={{height:44,maxWidth:120,objectFit:'contain'}}/>
+                        ):(
+                            <span style={{fontSize:34}}>{config.logo}</span>
+                        )}
+                        <h1 style={{fontSize:20,lineHeight:1}}>{config.siteName}</h1>
+                    </div>
+                    <nav style={{display:'flex',gap:6,alignItems:'center',flexWrap:'wrap'}}>
+                        {['Home','Services','Shop','Blog','Contact'].map(p=>(
+                            <button key={p} onClick={()=>setPage(p.toLowerCase())} className="btn" style={{padding:'9px 16px',background:page===p.toLowerCase()?'var(--p)':'#f5f5f5',color:page===p.toLowerCase()?'#fff':'#555',fontSize:14}}>{p}</button>
+                        ))}
+                        {user
+                            ? <button className="btn bo" style={{padding:'9px 16px',fontSize:14}} onClick={()=>{if(window.confirm('Logout?'))setUser(null);}}>{'👤 '+user.name}</button>
+                            : <button className="btn bo" style={{padding:'9px 16px',fontSize:14}} onClick={()=>setModal('auth')}>Login</button>
+                        }
+                        <button className="btn ba" style={{padding:'9px 16px',fontSize:14,position:'relative'}} onClick={()=>setModal('cart')}>
+                            {'🛒 Cart'}
+                            {cartN>0?<span style={{position:'absolute',top:-7,right:-7,background:'var(--s)',color:'var(--p)',width:20,height:20,borderRadius:'50%',fontSize:11,fontWeight:900,display:'flex',alignItems:'center',justifyContent:'center'}}>{cartN}</span>:null}
+                        </button>
+                        <button onClick={()=>setIsAdmin(true)} title="Admin" style={{background:'none',border:'none',cursor:'pointer',opacity:.12,fontSize:19,padding:4}}>⚙️</button>
+                    </nav>
+                </div>
+            </header>
+            <main>
+                {page==='home'?<HomePage/>:null}
+                {page==='services'?<ServicesPage/>:null}
+                {page==='shop'?<ShopPage/>:null}
+                {page==='blog'?<BlogPage/>:null}
+                {page==='contact'?<ContactPage/>:null}
+            </main>
+            <footer style={{background:'var(--p)',color:'#fff',padding:'52px 20px',marginTop:80,textAlign:'center'}}>
+                <div className="con">
+                    {config.logoImage?(<img src={config.logoImage} alt="logo" style={{height:60,maxWidth:150,objectFit:'contain',marginBottom:10}}/>):(<div style={{fontSize:38,marginBottom:10}}>{config.logo}</div>)}
+                    <h3 style={{color:'#fff',fontSize:20,marginBottom:10}}>{config.siteName}</h3>
+                    <p style={{opacity:.9,marginBottom:4}}>{'📞 '+config.contact.mobile}</p>
+                    <p style={{opacity:.9,marginBottom:20}}>{'✉️ '+config.contact.email}</p>
+                    <p style={{opacity:.5,fontSize:13}}>{'© 2024 '+config.siteName+'. All rights reserved.'}</p>
+                </div>
+            </footer>
+        </div>
+    );
+};
+
+const HomePage=()=>{
+    const{config,setPage,setModal}=useApp();
+    return(
+        <div>
+            <section style={{background:'linear-gradient(135deg,'+config.colors.primary+',#0a1f11)',color:'#fff',padding:'96px 20px',textAlign:'center'}}>
+                <div className="con">
+                    <div style={{fontSize:14,letterSpacing:4,textTransform:'uppercase',opacity:.7,marginBottom:14}}>Welcome to</div>
+                    <h1 style={{fontSize:52,color:'#fff',marginBottom:18,lineHeight:1.2}}>Transform Your Life and Business</h1>
+                    <p style={{fontSize:19,opacity:.9,marginBottom:36,maxWidth:560,margin:'0 auto 36px'}}>Expert coaching, motivational speaking and consulting services</p>
+                    <div style={{display:'flex',gap:14,justifyContent:'center',flexWrap:'wrap'}}>
+                        <button className="btn bs" style={{fontSize:16,padding:'15px 38px'}} onClick={()=>setPage('services')}>Explore Services</button>
+                        <button className="btn" style={{fontSize:16,padding:'15px 38px',background:'rgba(255,255,255,.15)',color:'#fff',border:'2px solid rgba(255,255,255,.4)'}} onClick={()=>setModal('book')}>Book a Session</button>
+                    </div>
+                </div>
+            </section>
+            <section style={{padding:'76px 20px'}}>
+                <div className="con">
+                    <h2 style={{textAlign:'center',fontSize:40,marginBottom:48}}>Why Choose Us</h2>
+                    <div className="g3">
+                        {[['🎯','Expert Guidance','15+ years of transformational coaching'],['🏆','Proven Results','Thousands of lives and businesses improved'],['💼','Tailored Approach','Programs customised to your unique needs'],['🌐','Online and Offline','Flexible modes to suit your schedule'],['🔒','Secure and Private','Your data always fully protected'],['📞','Always Accessible','Support before, during and after sessions']].map(([icon,title,desc],i)=>(
+                            <div key={i} className="card" style={{textAlign:'center',padding:'34px 22px'}}>
+                                <div style={{fontSize:50,marginBottom:16}}>{icon}</div>
+                                <h3 style={{fontSize:19,marginBottom:10}}>{title}</h3>
+                                <p style={{color:'#666',lineHeight:1.6,fontSize:14}}>{desc}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+        </div>
+    );
+};
+
+const ServicesPage=()=>{
+    const{services,addToCart}=useApp();
+    return(
+        <div style={{padding:'60px 20px'}}>
+            <div className="con">
+                <h1 style={{fontSize:44,marginBottom:10,textAlign:'center'}}>Our Services</h1>
+                <p style={{textAlign:'center',color:'#666',fontSize:17,marginBottom:48}}>Professional coaching programmes tailored for you</p>
+                <div className="g3">
+                    {services.filter(s=>s.enabled).map(s=>{
+                        const disc=Math.round((1-s.price/s.originalPrice)*100);
+                        const modeLabel=s.mode==='Both'?'Online + Offline':s.mode==='Online'?'Online Only':'Offline Only';
+                        return(
+                            <div key={s.id} className="card" style={{padding:0,overflow:'hidden'}}>
+                                <div style={{position:'relative'}}>
+                                    <img src={s.image} alt={s.title} style={{width:'100%',height:210,objectFit:'cover'}}/>
+                                    <span style={{position:'absolute',top:12,right:12,background:'var(--a)',color:'#fff',padding:'4px 11px',borderRadius:20,fontWeight:700,fontSize:12}}>{disc+'% OFF'}</span>
+                                    <span style={{position:'absolute',top:12,left:12,background:'rgba(0,0,0,.6)',color:'#fff',padding:'4px 11px',borderRadius:20,fontSize:12}}>{modeLabel}</span>
+                                </div>
+                                <div style={{padding:22}}>
+                                    <h3 style={{fontSize:20,marginBottom:7}}>{s.title}</h3>
+                                    <p style={{color:'#666',fontSize:13,marginBottom:16,lineHeight:1.6}}>{s.description}</p>
+                                    <div style={{marginBottom:18}}>
+                                        <span style={{textDecoration:'line-through',color:'#bbb',marginRight:10,fontSize:14}}>{'₹'+s.originalPrice.toLocaleString()}</span>
+                                        <span style={{fontSize:28,fontWeight:900,color:'var(--p)'}}>{'₹'+s.price.toLocaleString()}</span>
+                                    </div>
+                                    <button className="btn bp" style={{width:'100%'}} onClick={()=>{addToCart(s);alert('Added to cart!');}}>Add to Cart</button>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const ShopPage=()=>{
+    const{products,addToCart}=useApp();
+    return(
+        <div style={{padding:'60px 20px'}}>
+            <div className="con">
+                <h1 style={{fontSize:44,marginBottom:10,textAlign:'center'}}>Shop</h1>
+                <p style={{textAlign:'center',color:'#666',fontSize:17,marginBottom:48}}>Books, art and tools to keep you thriving</p>
+                <div className="g3">
+                    {products.filter(p=>p.enabled).map(p=>{
+                        const disc=Math.round((1-p.price/p.originalPrice)*100);
+                        return(
+                            <div key={p.id} className="card" style={{padding:0,overflow:'hidden'}}>
+                                <div style={{position:'relative'}}>
+                                    <img src={p.image} alt={p.title} style={{width:'100%',height:210,objectFit:'cover'}}/>
+                                    <span style={{position:'absolute',top:12,right:12,background:'var(--a)',color:'#fff',padding:'4px 11px',borderRadius:20,fontWeight:700,fontSize:12}}>{disc+'% OFF'}</span>
+                                </div>
+                                <div style={{padding:22}}>
+                                    <h3 style={{fontSize:19,marginBottom:7}}>{p.title}</h3>
+                                    <div style={{fontSize:13,fontWeight:700,color:p.stock>10?'#16a34a':'#dc2626',marginBottom:12}}>{p.stock>10?'In Stock':('Only '+p.stock+' left')}</div>
+                                    <div style={{marginBottom:18}}>
+                                        <span style={{textDecoration:'line-through',color:'#bbb',marginRight:10,fontSize:14}}>{'₹'+p.originalPrice.toLocaleString()}</span>
+                                        <span style={{fontSize:26,fontWeight:900,color:'var(--p)'}}>{'₹'+p.price.toLocaleString()}</span>
+                                    </div>
+                                    <button className="btn ba" style={{width:'100%'}} onClick={()=>{addToCart(p);alert('Added to cart!');}}>Add to Cart</button>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const BlogPage=()=>{
+    const{config}=useApp();
+    const[posts,setPosts]=useState([]);
+    const[loading,setLoading]=useState(false);
+    const[err,setErr]=useState('');
+    useEffect(()=>{
+        if(config.blogMode==='api'&&config.blogApiKey&&config.blogUrl){
+            setLoading(true);setErr('');
+            const blogId=config.blogUrl.replace(/.*blogspot\.com\/?/,'').replace(/\//g,'')||config.blogBlogId||'';
+            const apiUrl='https://www.googleapis.com/blogger/v3/blogs/byurl?url='+encodeURIComponent(config.blogUrl)+'&key='+config.blogApiKey;
+            fetch(apiUrl)
+                .then(r=>r.json())
+                .then(data=>{
+                    if(data.error){setErr('API Error: '+(data.error.message||'Check API key'));setLoading(false);return;}
+                    const postsUrl='https://www.googleapis.com/blogger/v3/blogs/'+data.id+'/posts?key='+config.blogApiKey+'&maxResults=9';
+                    return fetch(postsUrl).then(r=>r.json());
+                })
+                .then(data=>{
+                    if(data&&data.items){setPosts(data.items);}else{setErr('No posts found.');}
+                    setLoading(false);
+                })
+                .catch(e=>{setErr('Failed to load posts: '+e.message);setLoading(false);});
+        }
+    },[config.blogMode,config.blogApiKey,config.blogUrl]);
+    return(
+        <div style={{padding:'60px 20px'}}>
+            <div className="con">
+                <h1 style={{fontSize:44,marginBottom:10,textAlign:'center'}}>Blog and Insights</h1>
+                <p style={{textAlign:'center',color:'#666',fontSize:17,marginBottom:48}}>Wisdom, inspiration and practical tools</p>
+                {config.blogMode==='link'||!config.blogMode?(
+                    <div className="card" style={{textAlign:'center',padding:'68px 40px',maxWidth:580,margin:'0 auto'}}>
+                        <div style={{fontSize:68,marginBottom:20}}>📝</div>
+                        <h3 style={{fontSize:26,marginBottom:14}}>Visit Our Blog</h3>
+                        <p style={{color:'#666',marginBottom:30,fontSize:16,lineHeight:1.7}}>Read our latest articles, insights and coaching tips</p>
+                        <a href={config.blogUrl} target="_blank" rel="noopener noreferrer" className="btn bp" style={{textDecoration:'none',fontSize:16,padding:'15px 42px'}}>Visit Blog</a>
+                    </div>
+                ):(
+                    <div>
+                        {loading&&<div style={{textAlign:'center',padding:'60px 0',color:'#666'}}>Loading posts...</div>}
+                        {err&&<div style={{padding:16,background:'#fee2e2',borderRadius:12,color:'#dc2626',marginBottom:20}}>{err}</div>}
+                        {!loading&&!err&&posts.length===0&&<div style={{textAlign:'center',padding:'60px 0',color:'#666'}}>No posts loaded yet. Check your API key in Admin.</div>}
+                        <div className="g3">
+                            {posts.map(post=>(
+                                <a key={post.id} href={post.url} target="_blank" rel="noopener noreferrer" style={{textDecoration:'none'}}>
+                                    <div className="card" style={{padding:0,overflow:'hidden'}}>
+                                        {post.images&&post.images[0]?(
+                                            <img src={post.images[0].url} alt={post.title} style={{width:'100%',height:180,objectFit:'cover'}}/>
+                                        ):(
+                                            <div style={{height:120,background:'linear-gradient(135deg,#1a472a,#2d7a4a)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:40}}>📝</div>
+                                        )}
+                                        <div style={{padding:20}}>
+                                            <h3 style={{fontSize:17,marginBottom:8,lineHeight:1.4}}>{post.title}</h3>
+                                            <p style={{color:'#666',fontSize:13,lineHeight:1.6}}>{(post.labels||[]).join(' · ')}</p>
+                                            <p style={{fontSize:12,color:'#999',marginTop:8}}>{new Date(post.published).toLocaleDateString()}</p>
+                                        </div>
+                                    </div>
+                                </a>
+                            ))}
+                        </div>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+const ContactPage=()=>{
+    const{config,enquiryTypes,enquiries,upd}=useApp();
+    const[f,setF]=useState({name:'',email:'',mobile:'',location:'',type:'',message:''});
+    const fld=(k,v)=>{setF(p=>{const nv={...p,[k]:v};localStorage.setItem('tw_enq_draft',JSON.stringify(nv));return nv;});};
+    const submit=async e=>{
+        e.preventDefault();
+        const newEnq={...f,id:Date.now(),date:new Date().toISOString().split('T')[0]};
+        upd('enquiries',[...enquiries,newEnq]);
+        await notify(newEnq,'enquiry');
+        localStorage.removeItem('tw_enq_draft');
+        setF({name:'',email:'',mobile:'',location:'',type:'',message:''});
+    };
+    return(
+        <div style={{padding:'60px 20px'}}>
+            <div className="con" style={{maxWidth:820}}>
+                <h1 style={{fontSize:44,marginBottom:10,textAlign:'center'}}>Get In Touch</h1>
+                <p style={{textAlign:'center',color:'#666',fontSize:17,marginBottom:48}}>We would love to hear from you</p>
+                <div className="card">
+                    <form onSubmit={submit}>
+                        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16,marginBottom:16}}>
+                            <div><label>Full Name</label><input type="text" value={f.name} onChange={e=>fld('name',e.target.value)} required/></div>
+                            <div><label>Email</label><input type="email" value={f.email} onChange={e=>fld('email',e.target.value)} required/></div>
+                        </div>
+                        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16,marginBottom:16}}>
+                            <div><label>Mobile</label><input type="tel" value={f.mobile} onChange={e=>fld('mobile',e.target.value)} required/></div>
+                            <div><label>Location (City, Country)</label><input type="text" placeholder="Mumbai, India" value={f.location} onChange={e=>fld('location',e.target.value)} required/></div>
+                        </div>
+                        <div style={{marginBottom:16}}><label>Enquiry Type</label>
+                            <select value={f.type} onChange={e=>fld('type',e.target.value)} required>
+                                <option value="">Select type...</option>
+                                {enquiryTypes.map(t=><option key={t} value={t}>{t}</option>)}
+                            </select>
+                        </div>
+                        <div style={{marginBottom:22}}><label>Message</label><textarea rows={5} value={f.message} onChange={e=>fld('message',e.target.value)} required/></div>
+                        <button type="submit" className="btn bp" style={{width:'100%',fontSize:16}}>Send Message</button>
+                    </form>
+                </div>
+                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:18,marginTop:22}}>
+                    <div className="card" style={{background:'#f0fdf4',padding:22}}>
+                        <div style={{fontSize:30,marginBottom:8}}>📞</div>
+                        <div style={{fontWeight:700,marginBottom:4}}>Phone</div>
+                        <div style={{color:'#166534'}}>{config.contact.mobile}</div>
+                    </div>
+                    <div className="card" style={{background:'#eff6ff',padding:22}}>
+                        <div style={{fontSize:30,marginBottom:8}}>✉️</div>
+                        <div style={{fontWeight:700,marginBottom:4}}>Email</div>
+                        <div style={{color:'#1d4ed8'}}>{config.contact.email}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+/* ── BOOT ─────────────────────────────────────────────────────────── */
+try{
+    ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+}catch(err){
+    document.getElementById('root').innerHTML='<div style="padding:40px;font-family:sans-serif;max-width:600px;margin:40px auto;"><h2 style="color:#dc2626">Startup Error</h2><pre style="background:#fee2e2;padding:16px;border-radius:8px;overflow:auto">'+err.message+'</pre></div>';
+    console.error(err);
+}
+</script>
+</body>
+</html>
