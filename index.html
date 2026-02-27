@@ -130,7 +130,6 @@ const A=()=>React.useContext(Ctx);
 // ── HASH (no plaintext admin credentials stored) ──────────────
 const H=s=>{let h=0;for(let i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0}return(h>>>0).toString(16)};
 const SALT='twk25';
-// Admin: email=admin@twk.com pw=Thrive@2025 OR mobile=9953715382
 const checkAdmin=(id,pw)=>['e01893e1','47426d5b'].includes(H(id.trim()+SALT))&&H(pw+SALT)==='6f934d24';
 
 // ── XOR CRYPT ─────────────────────────────────────────────────
@@ -158,13 +157,13 @@ const mkDefault=()=>({
     siteName:'THRIVE WITH KAUSHIK',tagline:'Transform Your Life & Business',
     logo:'🌿',logoImage:'',
     colors:{primary:'#1a472a',secondary:'#c9a84c',accent:'#c0392b'},
-    contact:{mobile:'9953715382',email:'thrivewithkaushik@gmail.com',address:'New Delhi, India'},
+    contact:{mobile:'',email:'thrivewithkaushik@gmail.com',address:'New Delhi, India'},
     social:{
       facebook:{enabled:true,url:'https://facebook.com/thrivewithkaushik',icon:'f',color:'#1877f2',label:'Facebook'},
       instagram:{enabled:true,url:'https://instagram.com/thrivewithkaushik',icon:'📷',color:'#E4405F',label:'Instagram'},
       twitter:{enabled:true,url:'https://twitter.com/thrivewithkaushik',icon:'𝕏',color:'#111',label:'Twitter'},
       linkedin:{enabled:true,url:'https://linkedin.com/in/thrivewithkaushik',icon:'in',color:'#0077b5',label:'LinkedIn'},
-      whatsapp:{enabled:true,url:'https://wa.me/919953715382',icon:'💬',color:'#25D366',label:'WhatsApp'}
+      whatsapp:{enabled:true,url:'https://wa.me/91',icon:'💬',color:'#25D366',label:'WhatsApp'}
     },
     blogUrl:'https://thrivewithkaushik.blogspot.com',blogMode:'link',blogApiKey:''
   },
@@ -1079,8 +1078,6 @@ const AdminLogin=()=>{
       ),
       React.createElement('div',{style:{marginTop:24,padding:18,background:'linear-gradient(135deg,#F0F7F3,#E4F2EA)',borderRadius:14,fontSize:13,color:'#1C3829',lineHeight:1.9,border:'1px solid #B8DEC8'}},
         React.createElement('div',{style:{fontWeight:700,marginBottom:4,color:'var(--p)',fontSize:12,textTransform:'uppercase',letterSpacing:.8}},'Default Credentials'),
-        React.createElement('div',null,'📧 admin@twk.com'),
-        React.createElement('div',null,'🔑 Thrive@2025')
       )
     )
   );
